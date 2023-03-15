@@ -1438,6 +1438,7 @@ public abstract class AbstractJavaCodegen extends DefaultCodegen implements Code
             codegenModel.imports.add("JsonSubTypes");
             codegenModel.imports.add("JsonTypeInfo");
             codegenModel.imports.add("JsonIgnoreProperties");
+            codegenModel.imports.add("JsonIgnore");
         }
         if (codegenModel.getIsClassnameSanitized() && additionalProperties.containsKey(JACKSON) && !codegenModel.isEnum) {
             codegenModel.imports.add("JsonTypeName");

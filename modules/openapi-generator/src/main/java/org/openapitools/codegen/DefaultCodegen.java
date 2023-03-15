@@ -652,6 +652,19 @@ public class DefaultCodegen implements CodegenConfig {
             }
         }
 
+        // Forward discriminator knowledge to children
+        for (String name : allModels.keySet()) {
+            CodegenModel cm = allModels.get(name);
+            CodegenDiscriminator discriminator = cm.getDiscriminator();
+            if (discriminator != null) {
+                for (MappedModel mappedModel : discriminator.getMappedModels()) {
+                    CodegenModel model = allModels.get(mappedModel.getModelName());
+                    model.setHasDiscriminatorUpward(true);
+                    model.setUpwardDiscriminatorPropertyBaseName(discriminator.getPropertyBaseName());
+                }
+            }
+        }
+
         // loop through properties of each model to detect self-reference
         // and update mapped models for import
         for (ModelsMap entry : objs.values()) {
