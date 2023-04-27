@@ -1,0 +1,37 @@
+openapi: 3.0.0
+info:
+  description: conflict with properties number
+  version: 1.0.0
+  title: AllOf
+paths:
+  /dummy:
+    get:
+      summary: A dummy endpoint to make the spec valid.
+      responses:
+        '200':
+          description: Success
+components:
+  schemas:
+    object1:
+      title: object1
+      type: object
+      description: object 1
+      properties:
+        var11:
+          type: string
+        var12:
+          type: string
+        var13:
+          type: string
+    object2:
+      title: object2
+      type: object
+      description: object 2
+      properties:
+        var11:
+          type: string
+          x-protobuf-index: 1
+        var12:
+          type: string
+        var23:
+          type: string

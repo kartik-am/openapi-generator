@@ -271,7 +271,7 @@ public class DefaultGenerator implements Generator {
 
         config.preprocessOpenAPI(openAPI);
 
-        mergeComponents(openAPI.getComponents().getSchemas());
+        checkSchemas(openAPI.getComponents().getSchemas());
 
         // set OpenAPI to make these available to all methods
         config.setOpenAPI(openAPI);
@@ -298,49 +298,54 @@ public class DefaultGenerator implements Generator {
         }
     }
 
-    private void mergeComponents(Map<String, Schema> schemas) {
+    private void checkSchemas(Map<String, Schema> schemas) {
         for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
-            Set<String> duplicateSchemas = findDuplicates(schema, schemas.keySet());
+            Set<String> duplicateSchemas = findDuplicates(schema, schemas);
             if (duplicateSchemas != null && !duplicateSchemas.isEmpty() && isConflictingProperties(duplicateSchemas, schemas)) {
-                LOGGER.error("At least components '" + StringUtils.join(duplicateSchemas, ", ") + "' are duplicated. Maybe not listed components are duplicated too.");
-                throw new RuntimeException("At least components '" + StringUtils.join(duplicateSchemas, ", ") + "' are duplicated. Maybe not listed components are duplicated too.");
+                LOGGER.error("At least components '" + StringUtils.join(duplicateSchemas, ", ") + "' are duplicated with differences. Maybe not listed components are duplicated too.");
+                throw new RuntimeException("At least components '" + StringUtils.join(duplicateSchemas, ", ") + "' are duplicated with differences. Maybe not listed components are duplicated too.");
             }
         }
     }
 
     private boolean isConflictingProperties(Set<String> duplicateSchemas, Map<String, Schema> schemas) {
-        Set<String> referenceProperties = new HashSet<>();
+        StringBuilder reference = new StringBuilder();
         for (String schemaName : duplicateSchemas) {
             Schema schema = schemas.get(schemaName);
 
-            if (referenceProperties.isEmpty()) {
-                referenceProperties.addAll(schema.getProperties().keySet());
+            Map<String, Schema> properties = schema.getProperties();
+
+            if (reference.length() == 0) {
+                for (Map.Entry<String, Schema> property : properties.entrySet()) {
+                    reference.append(property.getKey()).append(property.getValue().getType());
+                }
                 continue;
             }
-            if (referenceProperties.size() == schema.getProperties().keySet().size()) {
-                if (!referenceProperties.containsAll(schema.getProperties().keySet())) {
-                    return true;
-                }
-            } else {
+
+            StringBuilder currentType = new StringBuilder();
+            for (Map.Entry<String, Schema> property : properties.entrySet()) {
+                currentType.append(property.getKey()).append(property.getValue().getType());
+            }
+
+            if (!reference.toString().equals(currentType.toString())) {
                 return true;
             }
         }
+
         return false;
     }
 
-    private Set findDuplicates(Map.Entry<String, Schema> schema, Set<String> schemasName) {
+    private Set findDuplicates(Map.Entry<String, Schema> refSchema, Map<String, Schema> schemas) {
         Set<String> duplicateSchemas = new HashSet<>();
-        String schemaKey = schema.getKey();
-        if (!schemaKey.endsWith("_allOf")) {
-            String shortSchemaName = schemaKey.substring(schemaKey.lastIndexOf("_") + 1);
-            for (String fullSchemaName : schemasName) {
-                String shortSuspeciousSchemaName = fullSchemaName.substring(fullSchemaName.lastIndexOf("_") + 1);
-                if (!fullSchemaName.equals(schemaKey)
+        String schemaKey = refSchema.getKey();
+
+        for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
+            if (refSchema.getValue().getName() != null && schema.getValue().getName() != null) {
+                if (!schema.getKey().equals(schemaKey)
                         && !duplicateSchemas.contains(schemaKey)
-                        && !duplicateSchemas.contains(fullSchemaName)
-                        && shortSchemaName.equals(shortSuspeciousSchemaName)) {
+                        && refSchema.getValue().getName().equals(schema.getValue().getName())) {
                     duplicateSchemas.add(schemaKey);
-                    duplicateSchemas.add(fullSchemaName);
+                    duplicateSchemas.add(schema.getKey());
                 }
             }
         }

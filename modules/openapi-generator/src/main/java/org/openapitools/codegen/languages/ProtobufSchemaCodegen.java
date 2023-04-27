@@ -44,6 +44,7 @@ import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.openapitools.codegen.utils.StringUtils.*;
 
@@ -63,6 +64,8 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
 
     public static final String USE_WRAPPER_TYPES = "useWrapperTypes";
 
+    public static final String CHECK_PROPERTIES_DUPLICATION = "checkPropertiesDuplication";
+
     private final Logger LOGGER = LoggerFactory.getLogger(ProtobufSchemaCodegen.class);
 
     protected String packageName = "openapitools";
@@ -78,6 +81,8 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
     private boolean fieldNamesInSnakeCase = false;
 
     private boolean useWrapperTypes = false;
+
+    private boolean checkPropertiesDuplication = false;
 
     private Map<String, String> protoWrapperTypesMapping = new HashMap<>();
 
@@ -190,6 +195,7 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
         addSwitch(START_ENUMS_WITH_UNSPECIFIED, "Introduces \"UNSPECIFIED\" as the first element of enumerations.", startEnumsWithUnspecified);
         addSwitch(FIELD_NAMES_IN_SNAKE_CASE, "Field names in snake_case.", fieldNamesInSnakeCase);
         addSwitch(USE_WRAPPER_TYPES, "Use primitive well-known wrappers types.", useWrapperTypes);
+        addSwitch(CHECK_PROPERTIES_DUPLICATION, "Check duplication on properties.", checkPropertiesDuplication);
     }
 
     @Override
@@ -233,6 +239,10 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
         }
         if (additionalProperties.containsKey(ProtobufSchemaCodegen.USE_WRAPPER_TYPES)) {
             this.useWrapperTypes = convertPropertyToBooleanAndWriteBack(USE_WRAPPER_TYPES);
+        }
+
+        if (additionalProperties.containsKey(ProtobufSchemaCodegen.CHECK_PROPERTIES_DUPLICATION)) {
+            this.checkPropertiesDuplication = convertPropertyToBooleanAndWriteBack(CHECK_PROPERTIES_DUPLICATION);
         }
         configureTypeMapping();
 
@@ -961,6 +971,10 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
         super.postProcessAllModels(objs);
         super.updateAllModels(objs);
 
+        if (this.checkPropertiesDuplication) {
+            checkPropertiesDuplication(objs);
+        }
+
         Map<String, CodegenModel> allModels = this.getAllModels(objs);
 
         for (CodegenModel cm : allModels.values()) {
@@ -989,6 +1003,36 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
             }
         }
         return objs;
+    }
+
+    private void checkPropertiesDuplication(Map<String, ModelsMap> allProcessedModels) {
+        Map<String, Integer> propertiesMap= new HashMap<>();
+        for (Map.Entry<String, ModelsMap> entry : allProcessedModels.entrySet()) {
+            if (entry.getKey().endsWith("_allOf") || entry.getKey().startsWith("_")) {
+                continue;
+            }
+            for (ModelMap modelMap : entry.getValue().getModels()) {
+                List<String> parentProperties = new ArrayList<>();
+                if (modelMap.getModel().parent != null) {
+                    parentProperties = allProcessedModels.get(modelMap.getModel().parent).getModels().get(0).getModel().vars.stream()
+                            .map(codegenProperty -> codegenProperty.baseName)
+                            .collect(Collectors.toList());
+                }
+                for (CodegenProperty property : modelMap.getModel().vars) {
+                    String name = property.baseName;
+                    Integer index = (Integer) property.vendorExtensions.get("x-protobuf-index");
+                    if (!parentProperties.contains(name)) {
+                        if (propertiesMap.containsKey(name)) {
+                            if (index.intValue() == propertiesMap.get(name).intValue()) {
+                                LOGGER.error("Property '" + name + "' is duplicated with same protobuf index value");
+                                throw new RuntimeException("Property '" + name + "' is duplicated with same protobuf index value");
+                            }
+                        }
+                        propertiesMap.put(name, index);
+                    }
+                }
+            }
+        }
     }
 
     private CodegenProperty getVarWithName(String propertyName, List<CodegenProperty> vars) {
