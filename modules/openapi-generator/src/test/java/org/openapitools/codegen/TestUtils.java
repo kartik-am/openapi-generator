@@ -1,10 +1,5 @@
 package org.openapitools.codegen;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertFalse;
-
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ParseResult;
@@ -19,6 +14,7 @@ import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.core.models.ParseOptions;
 
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.kotlin.org.jline.utils.Log;
 import org.openapitools.codegen.MockDefaultGenerator.WrittenTemplateBasedFile;
 import org.openapitools.codegen.java.assertions.JavaFileAssert;
 import org.openapitools.codegen.model.ModelMap;
@@ -34,13 +30,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import com.google.common.collect.ImmutableMap;
+
+import static org.testng.Assert.*;
 
 public class TestUtils {
 
@@ -123,6 +117,15 @@ public class TestUtils {
         Optional<WrittenTemplateBasedFile> optional = generator.getTemplateBasedFiles().stream().filter(f -> defaultApiFilename.equals(f.getOutputFilename())).findFirst();
         Assert.assertTrue(optional.isPresent());
         return optional.get();
+    }
+
+    public static void assertFileEquals(Path generatedFilePath, Path expectedFilePath) throws IOException {
+        String generatedFile = new String(Files.readAllBytes(generatedFilePath), StandardCharsets.UTF_8)
+                .replace("\n", "").replace("\r", "");
+        String expectedFile = new String(Files.readAllBytes(expectedFilePath), StandardCharsets.UTF_8)
+                .replace("\n", "").replace("\r", "");
+
+        assertEquals(generatedFile, expectedFile);
     }
 
     public static void ensureContainsFile(List<File> generatedFiles, File root, String filename) {
