@@ -114,6 +114,21 @@ public class ProtobufSchemaCodegenTest {
     }
 
     @Test
+    public void testCodeGenWithConflictingPropertiesNameWithInheritance() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> globalProperties = new HashMap<>();
+        // set line break to \n across all platforms
+        System.setProperty("line.separator", "\n");
+
+        properties.put("checkPropertiesDuplication", true);
+
+        File output = Files.createTempDirectory("test").toFile();
+        List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/conflictPropertiesNameWithInheritance.yaml");
+
+        FileUtils.deleteDirectory(output);
+    }
+
+    @Test
     public void testCodeGenWithConflictingPropertiesNumber() throws IOException {
         Map<String, Object> properties = new HashMap<>();
         Map<String, String> globalProperties = new HashMap<>();
