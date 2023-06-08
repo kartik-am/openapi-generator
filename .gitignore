@@ -278,3 +278,5 @@ samples/openapi3/client/petstore/go/privatekey.pem
 
 ## OCaml
 samples/client/petstore/ocaml/_build/
+
+modules/openapi-generator/src/main/resources/codegen/temporaryInputSpec.yaml

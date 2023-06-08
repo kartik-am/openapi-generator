@@ -1,0 +1,37 @@
+openapi: 3.0.0
+info:
+  description: This specification is used as a demonstration for allOf option
+  version: 1.0.0
+  title: AllOf
+paths:
+  /dummy:
+    get:
+      summary: A dummy endpoint to make the spec valid.
+      responses:
+        '200':
+          description: Success
+components:
+  schemas:
+    Container:
+      type: object
+      properties :
+        isEmpty :
+          type: boolean
+
+    Box:
+      type: object
+      properties:
+        Cont1:
+          x-protobuf-index: 14
+          allOf:
+            - $ref: '#/components/schemas/Container'
+          x-protobuf-name: 'changedName'
+
+    Box2:
+      type: object
+      properties:
+        Cont2:
+          $ref: '#/components/schemas/Container'
+          x-protobuf-index: 11
+          x-protobuf-field-name: field1
+
