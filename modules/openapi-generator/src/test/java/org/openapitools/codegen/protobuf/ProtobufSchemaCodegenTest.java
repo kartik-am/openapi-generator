@@ -125,7 +125,7 @@ public class ProtobufSchemaCodegenTest {
         File output = Files.createTempDirectory("test").toFile();
         List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/conflictPropertiesNameWithInheritance.yaml");
 
-        // TODO : Verify with Fabrice that is indeed the goal of this test
+        // -------------------------------TODO : Verify with Fabrice that is indeed the goal of this test
         TestUtils.ensureContainsFile(files, output, "models/pet.proto");
         Path path = Paths.get(output + "/models/pet.proto");
         TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/conflictPropertiesNameWithInheritancePet.proto"));

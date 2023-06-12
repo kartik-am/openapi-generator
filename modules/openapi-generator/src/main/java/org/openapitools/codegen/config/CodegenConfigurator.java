@@ -40,16 +40,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.LoaderOptions;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.reflect.Array;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -709,9 +704,9 @@ public class CodegenConfigurator {
                 LinkedHashMap inputSpecMap = yaml.load(Files.newInputStream(Paths.get(this.inputSpec)));
                 findAndReplaceReferenceInYamlMap(inputSpecMap, true);
 
-                FileWriter fw = new FileWriter(newInputSpec);
-                yaml.dump(inputSpecMap, fw);
-                fw.close();
+                FileOutputStream outputStream = new FileOutputStream(newInputSpec);
+                outputStream.write(yaml.dump(inputSpecMap).getBytes(StandardCharsets.UTF_8));
+                outputStream.close();
 
                 return newInputSpec.getPath();
 
