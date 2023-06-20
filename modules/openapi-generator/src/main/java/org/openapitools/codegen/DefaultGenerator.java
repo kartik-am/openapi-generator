@@ -65,6 +65,7 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -450,6 +451,8 @@ public class DefaultGenerator implements Generator {
             config.postProcessAllCustomOptions(customOptions, customOptionsFileName);
             allProcessedCustomOptions.put("optionCategories", categories.values());
             allProcessedCustomOptions.put("customOptions", customOptions);
+            allProcessedCustomOptions.put("generatorVersion", ImplementationVersion.read());
+            allProcessedCustomOptions.put("generatedDate", ZonedDateTime.now().toString());
             config.updateCustomOptionsMapping(customOptions, categories);
     
             try {
@@ -1736,4 +1739,8 @@ public class DefaultGenerator implements Generator {
         return StringUtils.removeEnd(value, "/");
     }
 
+    private String getGeneratorVersion() {
+        Package mainPackage = this.getClass().getPackage();
+        return mainPackage.getImplementationVersion();
+    }
 }

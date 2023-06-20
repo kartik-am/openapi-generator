@@ -17,14 +17,19 @@
 package org.openapitools.codegen.protobuf;
 
 import org.apache.commons.io.FileUtils;
+import org.mockito.MockedStatic;
 import org.openapitools.codegen.ClientOptInput;
 import org.openapitools.codegen.DefaultGenerator;
 import org.openapitools.codegen.TestUtils;
 import org.openapitools.codegen.config.CodegenConfigurator;
 import org.openapitools.codegen.languages.ProtobufVersion2SchemaCodegen;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
+import static org.mockito.Mockito.mockStatic;
 import static org.testng.Assert.*;
 
 import java.io.File;
@@ -33,11 +38,30 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ProtobufVersion2SchemaCodegenTest {
+
+    private static MockedStatic<ZonedDateTime> mockedStatic;
+
+    @BeforeClass
+    public void setup() {
+        Clock clock = Clock.fixed(Instant.parse("2023-06-19T00:00:00Z"), ZoneId.of("UTC"));
+        ZonedDateTime expectedDate = ZonedDateTime.now(clock);
+        mockedStatic = mockStatic(ZonedDateTime.class);
+        mockedStatic.when(ZonedDateTime::now).thenReturn(expectedDate);
+    }
+
+    @AfterClass
+    public void finish() {
+        mockedStatic.close();
+    }
 
     @Test
     public void testBasicModel() throws IOException {

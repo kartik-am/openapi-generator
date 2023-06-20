@@ -17,6 +17,7 @@
 package org.openapitools.codegen.protobuf;
 
 import org.apache.commons.io.FileUtils;
+import org.mockito.MockedStatic;
 import org.openapitools.codegen.ClientOptInput;
 import org.openapitools.codegen.DefaultGenerator;
 import org.openapitools.codegen.TestUtils;
@@ -25,9 +26,12 @@ import org.openapitools.codegen.languages.ProtobufSchemaCodegen;
 import org.openapitools.codegen.meta.FeatureSet;
 import org.openapitools.codegen.meta.features.WireFormatFeature;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.Mockito.mockStatic;
 import static org.testng.Assert.*;
 
 import java.io.File;
@@ -35,6 +39,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.*;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +47,21 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class ProtobufSchemaCodegenTest {
+
+    private static MockedStatic<ZonedDateTime> mockedStatic;
+
+    @BeforeClass
+    public void setup() {
+        Clock clock = Clock.fixed(Instant.parse("2023-06-19T00:00:00Z"), ZoneId.of("UTC"));
+        ZonedDateTime expectedDate = ZonedDateTime.now(clock);
+        mockedStatic = mockStatic(ZonedDateTime.class);
+        mockedStatic.when(ZonedDateTime::now).thenReturn(expectedDate);
+    }
+
+    @AfterClass
+    public void finish() {
+        mockedStatic.close();
+    }
 
     /*@Test
     public void testCodeGenWithOneOf() throws IOException {

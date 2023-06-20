@@ -1,4 +1,8 @@
 /*
+  Generation info:
+    - generator version: unset
+    - datetime: 2023-06-19T00:00Z[UTC]
+
   Extension enum missing index
 
   This specification is used as source for a test to demonstrate handling of x-enum-protobuf-indexes extension with missing index item. An index is generated automatically to compensate the missing one.

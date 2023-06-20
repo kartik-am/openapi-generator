@@ -1,4 +1,8 @@
 /*
+  Generation info:
+    - generator version: unset
+    - datetime: 2023-06-19T00:00Z[UTC]
+
   Name snake case
 
   This specification is used as source for a test to demonstrate the use of the additional property fieldNamesInSnakeCase

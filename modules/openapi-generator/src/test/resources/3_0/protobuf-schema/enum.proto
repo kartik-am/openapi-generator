@@ -1,4 +1,8 @@
 /*
+  Generation info:
+    - generator version: unset
+    - datetime: 2023-06-19T00:00Z[UTC]
+
   Enum
 
   This specification is used as source for a test to demonstrate the addition of UNSPECIFIED value, and the use of enum name as prefix for each enum value

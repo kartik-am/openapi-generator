@@ -1,4 +1,8 @@
 /*
+  Generation info:
+    - generator version: unset
+    - datetime: 2023-06-19T00:00Z[UTC]
+
   Google Wrapper Types
 
   This specification is used as a demonstration for the problem with $ref causing the generator to ignore additional information
