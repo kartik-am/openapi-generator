@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import org.assertj.core.condition.AllOf;
+import org.mockito.MockedStatic;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.config.CodegenConfigurator;
 import org.openapitools.codegen.java.assertions.JavaFileAssert;
@@ -14,6 +15,8 @@ import org.openapitools.codegen.languages.AbstractJavaJAXRSServerCodegen;
 import org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen;
 import org.openapitools.codegen.languages.features.CXFServerFeatures;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -22,12 +25,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.mockito.Mockito.mockStatic;
 import static org.openapitools.codegen.TestUtils.assertFileContains;
 import static org.openapitools.codegen.TestUtils.validateJavaSourceFiles;
 import static org.openapitools.codegen.languages.AbstractJavaJAXRSServerCodegen.USE_TAGS;
@@ -43,6 +51,22 @@ import com.google.common.collect.ImmutableMap;
  * @author attrobit
  */
 public class JavaJAXRSSpecServerCodegenTest extends JavaJaxrsBaseTest {
+
+    private static MockedStatic<ZonedDateTime> mockedStatic;
+
+    @BeforeClass
+    public void setup() {
+
+        Clock clock = Clock.fixed(Instant.parse("2023-06-19T00:00:00Z"), ZoneId.of("UTC"));
+        ZonedDateTime expectedDate = ZonedDateTime.now(clock);
+        mockedStatic = mockStatic(ZonedDateTime.class);
+        mockedStatic.when(ZonedDateTime::now).thenReturn(expectedDate);
+    }
+
+    @AfterClass
+    public void finish() {
+        mockedStatic.close();
+    }
 
     @BeforeMethod
     public void before() {
@@ -886,5 +910,91 @@ public class JavaJAXRSSpecServerCodegenTest extends JavaJaxrsBaseTest {
                 "@org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition(\n" +
                         "   info = @org.eclipse.microprofile.openapi.annotations.info.Info(\n" +
                         "        title = \"user\", version=\"1.0.0\", description=\"Operations about user\",");
+    }
+
+    @Test
+    public void generateModelWithEnumBase() throws Exception {
+        final File output = Files.createTempDirectory("test").toFile();
+        output.deleteOnExit();
+
+        final OpenAPI openAPI = new OpenAPIParser()
+                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/enum_base" +
+                        ".yaml", null, new ParseOptions()).getOpenAPI();
+
+        codegen.setOutputDir(output.getAbsolutePath());
+
+        final ClientOptInput input = new ClientOptInput()
+                .openAPI(openAPI)
+                .config(codegen); //Using JavaJAXRSSpecServerCodegen
+
+        final DefaultGenerator generator = new DefaultGenerator();
+        final List<File> files = generator.opts(input).generate(); //When generating files
+
+        //Then the java files are compilable
+        validateJavaSourceFiles(files);
+
+        //And the generated class contains CompletionStage<Response>
+        TestUtils.ensureContainsFile(files, output, "src/gen/java/org/openapitools/model/EnumBase.java");
+        Path path = Paths.get(output + "/src/gen/java/org/openapitools/model/EnumBase.java");
+        // Expected JAVA file is suffixed by .test to avoid automatic JAVA refactor done by IDE
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/JavaJaxRSSpec/EnumBase.java.test"));
+    }
+
+    @Test
+    public void generateModelWithEnumUnknown() throws Exception {
+        final File output = Files.createTempDirectory("test").toFile();
+        output.deleteOnExit();
+
+        final OpenAPI openAPI = new OpenAPIParser()
+                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/enum_unknown" +
+                        ".yaml", null, new ParseOptions()).getOpenAPI();
+
+        codegen.setOutputDir(output.getAbsolutePath());
+        codegen.additionalProperties().put(START_ENUMS_WITH_UNKNOWN, true);
+
+        final ClientOptInput input = new ClientOptInput()
+                .openAPI(openAPI)
+                .config(codegen); //Using JavaJAXRSSpecServerCodegen
+
+        final DefaultGenerator generator = new DefaultGenerator();
+        final List<File> files = generator.opts(input).generate(); //When generating files
+
+        //Then the java files are compilable
+        validateJavaSourceFiles(files);
+
+        //And the generated class contains CompletionStage<Response>
+        TestUtils.ensureContainsFile(files, output, "src/gen/java/org/openapitools/model/EnumUnknown.java");
+        Path path = Paths.get(output + "/src/gen/java/org/openapitools/model/EnumUnknown.java");
+        // Expected JAVA file is suffixed by .test to avoid automatic JAVA refactor done by IDE
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/JavaJaxRSSpec/EnumUnknown.java.test"));
+    }
+
+    @Test
+    public void generateModelWithEnumUnspecified() throws Exception {
+        final File output = Files.createTempDirectory("test").toFile();
+        output.deleteOnExit();
+
+        final OpenAPI openAPI = new OpenAPIParser()
+                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/enum_unspecified" +
+                        ".yaml", null, new ParseOptions()).getOpenAPI();
+
+        codegen.setOutputDir(output.getAbsolutePath());
+        codegen.additionalProperties().put(START_ENUMS_WITH_UNSPECIFIED, true);
+
+        final ClientOptInput input = new ClientOptInput()
+                .openAPI(openAPI)
+                .config(codegen); //Using JavaJAXRSSpecServerCodegen
+
+        final DefaultGenerator generator = new DefaultGenerator();
+        final List<File> files = generator.opts(input).generate(); //When generating files
+
+        //Then the java files are compilable
+        validateJavaSourceFiles(files);
+
+        //And the generated class contains CompletionStage<Response>
+        TestUtils.ensureContainsFile(files, output, "src/gen/java/org/openapitools/model/EnumUnspecified.java");
+        Path path = Paths.get(output + "/src/gen/java/org/openapitools/model/EnumUnspecified.java");
+        // Expected JAVA file is suffixed by .test to avoid automatic JAVA refactor done by IDE
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/JavaJaxRSSpec/EnumUnspecified.java.test"));
     }
 }

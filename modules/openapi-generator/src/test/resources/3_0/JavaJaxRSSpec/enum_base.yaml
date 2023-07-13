@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  description: This specification is used as a demonstration for enum type
+  version: 1.0.0
+  title: Enum
+paths:
+  /dummy:
+    get:
+      summary: A dummy endpoint to make the spec valid.
+      responses:
+        '200':
+          description: Success
+components:
+  schemas:
+    EnumBase:
+      type: string
+      enum:
+        - enum1
+        - enum2
+        - enum3

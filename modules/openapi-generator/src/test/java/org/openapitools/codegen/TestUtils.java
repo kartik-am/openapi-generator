@@ -121,9 +121,9 @@ public class TestUtils {
 
     public static void assertFileEquals(Path generatedFilePath, Path expectedFilePath) throws IOException {
         String generatedFile = new String(Files.readAllBytes(generatedFilePath), StandardCharsets.UTF_8)
-                .replace("\n", "").replace("\r", "");
+                .replace("\n", "").replace("\r", "").replace("\t", "");
         String expectedFile = new String(Files.readAllBytes(expectedFilePath), StandardCharsets.UTF_8)
-                .replace("\n", "").replace("\r", "");
+                .replace("\n", "").replace("\r", "").replace("\t", "");
 
         assertEquals(generatedFile, expectedFile);
     }

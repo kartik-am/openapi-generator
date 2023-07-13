@@ -20,12 +20,19 @@ package org.openapitools.codegen.languages;
 import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.openapitools.codegen.*;
+import org.openapitools.codegen.exceptions.ProtoBufIndexComputationException;
 import org.openapitools.codegen.meta.features.DocumentationFeature;
+import org.openapitools.codegen.model.ModelMap;
+import org.openapitools.codegen.model.ModelsMap;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.openapitools.codegen.languages.features.GzipFeatures.USE_GZIP_FEATURE;
+import static org.openapitools.codegen.utils.StringUtils.underscore;
 
 public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
 
@@ -42,6 +49,8 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
     public static final String OPEN_LIBERTY_LIBRARY = "openliberty";
     public static final String HELIDON_LIBRARY = "helidon";
     public static final String KUMULUZEE_LIBRARY = "kumuluzee";
+    public static final String START_ENUMS_WITH_UNKNOWN = "startEnumsWithUnknown";
+    public static final String START_ENUMS_WITH_UNSPECIFIED = "startEnumsWithUnspecified";
 
     private boolean interfaceOnly = false;
     private boolean returnResponse = false;
@@ -53,6 +62,9 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
     protected boolean useGzipFeature = false;
     private boolean useJackson = false;
     private String openApiSpecFileLocation = "src/main/openapi/openapi.yaml";
+    private boolean startEnumsWithUnknown = false;
+
+    private boolean startEnumsWithUnspecified = false;
 
     public JavaJAXRSSpecServerCodegen() {
         super();
@@ -110,6 +122,8 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
         cliOptions.add(CliOption.newBoolean(USE_MICROPROFILE_OPENAPI_ANNOTATIONS, "Whether to generate Microprofile OpenAPI annotations. Only valid when library is set to quarkus.", useMicroProfileOpenAPIAnnotations));
         cliOptions.add(CliOption.newString(OPEN_API_SPEC_FILE_LOCATION, "Location where the file containing the spec will be generated in the output folder. No file generated when set to null or empty string."));
         cliOptions.add(CliOption.newBoolean(SUPPORT_ASYNC, "Wrap responses in CompletionStage type, allowing asynchronous computation (requires JAX-RS 2.1).", supportAsync));
+        cliOptions.add(CliOption.newBoolean(START_ENUMS_WITH_UNKNOWN, "Introduces \"UNKNOWN\" as the first element of enumerations.", startEnumsWithUnknown));
+        cliOptions.add(CliOption.newBoolean(START_ENUMS_WITH_UNSPECIFIED, "Introduces \"UNSPECIFIED\" as the first element of enumerations.", startEnumsWithUnspecified));
     }
 
     @Override
@@ -251,6 +265,14 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
                 additionalProperties.remove(USE_GZIP_FEATURE);
             }
         }
+
+        if (additionalProperties.containsKey(this.START_ENUMS_WITH_UNKNOWN)) {
+            this.startEnumsWithUnknown = convertPropertyToBooleanAndWriteBack(START_ENUMS_WITH_UNKNOWN);
+        }
+
+        if (additionalProperties.containsKey(this.START_ENUMS_WITH_UNSPECIFIED)) {
+            this.startEnumsWithUnspecified = convertPropertyToBooleanAndWriteBack(START_ENUMS_WITH_UNSPECIFIED);
+        }
     }
 
     @Override
@@ -292,6 +314,37 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
         return super.postProcessSupportingFileData(objs);
     }
 
+    /**
+     * Adds prefix to the enum allowable values
+     * NOTE: Enum values use C++ scoping rules, meaning that enum values are siblings of their type, not children of it. Therefore, enum value must be unique
+     *
+     * @param allowableValues allowable values
+     * @param prefix          added prefix
+     * @param dataType dataType
+     */
+    public void addEnumValuesPrefix(Map<String, Object> allowableValues, String prefix, String dataType){
+        if(allowableValues.containsKey("enumVars")) {
+            List<Map<String, Object>> enumVars = (List<Map<String, Object>>)allowableValues.get("enumVars");
+
+            for(Map<String, Object> value : enumVars) {
+                String name = (String)value.get("name");
+                value.put("name", toEnumVarName(prefix + "_" + name, dataType));
+                value.put("value", toEnumValue (prefix + "_" + name, dataType));
+            }
+        }
+
+        // update values
+        if(allowableValues.containsKey("values")) {
+            List<String> values = (List<String>)allowableValues.get("values");
+            for(int i = 0 ; i < values.size() ; i++) {
+                if (!values.get(i).startsWith(prefix + "_")) {
+                    // replace value by value with prefix
+                    values.set(i, underscore(prefix + "_" + values.get(i)).toUpperCase(Locale.ROOT));
+                }
+            }
+        }
+    }
+
     @Override
     public String getHelp() {
         return "Generates a Java JAXRS Server according to JAXRS 2.0 specification.";
@@ -307,4 +360,46 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
         }
     }
 
+    /**
+     * Adds unknown value to the enum allowable values
+     *
+     * @param allowableValues allowable values
+     */
+    public void addUnknownToAllowableValues(Map<String, Object> allowableValues) {
+        if(startEnumsWithUnspecified || startEnumsWithUnknown) {
+            String value = startEnumsWithUnspecified ? "UNSPECIFIED" : "UNKNOWN";
+            if(allowableValues.containsKey("enumVars")) {
+                List<Map<String, Object>> enumVars = (List<Map<String, Object>>)allowableValues.get("enumVars");
+
+                // add unspecified only if not already present
+                if (enumVars.size() > 0 && !value.equals(enumVars.get(0).get("name"))) {
+                    HashMap<String, Object> unknown = new HashMap<String, Object>();
+                    unknown.put("name", value);
+                    unknown.put("isString", "false");
+                    unknown.put("value", "\"" + value + "\"");
+
+                    enumVars.add(0, unknown);
+                }
+            }
+
+            // add unspecified only if not already present
+            if(allowableValues.containsKey("values") && !((List<String>)allowableValues.get("values")).get(0).endsWith(value)) {
+                List<String> values = (List<String>)allowableValues.get("values");
+                values.add(0, value);
+            }
+        }
+    }
+
+    @Override
+    public ModelsMap postProcessModels(ModelsMap objs) {
+        for (ModelMap modelMap : objs.getModels()) {
+            CodegenModel model = modelMap.getModel();
+            if (model.isEnum) {
+                Map<String, Object> allowableValues = model.getAllowableValues();
+                addUnknownToAllowableValues(allowableValues);
+                addEnumValuesPrefix(allowableValues, model.getClassname(), model.dataType);
+            }
+        }
+        return super.postProcessModels(objs);
+    }
 }
