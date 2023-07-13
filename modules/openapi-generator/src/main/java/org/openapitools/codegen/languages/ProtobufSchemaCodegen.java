@@ -318,19 +318,19 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
 
     @Override
     public CodegenModel fromModel(String name, Schema schema) {
-    	CodegenModel model = super.fromModel(name, schema);
-    	if (model.getDiscriminator() != null) {
-    		// Add descriminator as a var if not defined as an attribute already
-        	CodegenProperty discriminatorProperty = new CodegenProperty();
-        	discriminatorProperty.setDatatype(model.getDiscriminator().getPropertyType());
-        	discriminatorProperty.isString = true;
-        	discriminatorProperty.setRequired(false);
-        	discriminatorProperty.setName(model.getDiscriminator().getPropertyName());
-        	if (!modelVarsContainsVar(model.getVars(), discriminatorProperty)) {
-        		model.getVars().add(discriminatorProperty);
-        	}
-    	}
-    	return model;
+        CodegenModel model = super.fromModel(name, schema);
+        if (model.getDiscriminator() != null) {
+            // Add descriminator as a var if not defined as an attribute already
+            CodegenProperty discriminatorProperty = new CodegenProperty();
+            discriminatorProperty.setDatatype(model.getDiscriminator().getPropertyType());
+            discriminatorProperty.isString = true;
+            discriminatorProperty.setRequired(false);
+            discriminatorProperty.setName(model.getDiscriminator().getPropertyName());
+            if (!modelVarsContainsVar(model.getVars(), discriminatorProperty)) {
+                model.getVars().add(discriminatorProperty);
+            }
+        }
+        return model;
     }
 
     /**
@@ -1036,19 +1036,19 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
     }
 
     private CodegenProperty getVarWithName(String propertyName, List<CodegenProperty> vars) {
-		for (CodegenProperty var : vars) {
-			if (propertyName.equals(var.getName())) {
-				return var;
-			}
-		}
-		return null;
-	}
+        for (CodegenProperty var : vars) {
+            if (propertyName.equals(var.getName())) {
+                return var;
+            }
+        }
+        return null;
+    }
 
-	private void addVarIfNotAlreadyPresent(CodegenModel model, CodegenProperty newVar) {
-    	if (!modelVarsContainsVar(model.getVars(), newVar)) {
-    		model.getVars().add(newVar);
-    	}
-	}
+    private void addVarIfNotAlreadyPresent(CodegenModel model, CodegenProperty newVar) {
+        if (!modelVarsContainsVar(model.getVars(), newVar)) {
+            model.getVars().add(newVar);
+        }
+    }
 
     public void addImport(Map<String, ModelsMap> objs, CodegenModel cm, String importValue) {
         String mapping = importMapping().get(importValue);
