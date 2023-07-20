@@ -656,7 +656,7 @@ public class DefaultCodegen implements CodegenConfig {
         for (String name : allModels.keySet()) {
             CodegenModel cm = allModels.get(name);
             CodegenDiscriminator discriminator = cm.getDiscriminator();
-            if (discriminator != null) {
+            if (discriminator != null && discriminator.getMappedModels() != null && !discriminator.getMappedModels().isEmpty()) {
                 for (MappedModel mappedModel : discriminator.getMappedModels()) {
                     CodegenModel model = allModels.get(mappedModel.getModelName());
                     model.setHasDiscriminatorUpward(true);
