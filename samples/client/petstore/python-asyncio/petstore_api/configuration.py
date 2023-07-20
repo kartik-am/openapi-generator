@@ -208,6 +208,10 @@ conf = petstore_api.Configuration(
         self.assert_hostname = None
         """Set this to True/False to enable/disable SSL hostname verification.
         """
+        self.tls_server_name = None
+        """SSL/TLS Server Name Indication (SNI)
+           Set this to the SNI value expected by the server.
+        """
 
         self.connection_pool_maxsize = 100
         """This value is passed to the aiohttp to limit simultaneous connections.
@@ -405,6 +409,13 @@ conf = petstore_api.Configuration(
         :return: The Auth Settings information dict.
         """
         auth = {}
+        if self.access_token is not None:
+            auth['petstore_auth'] = {
+                'type': 'oauth2',
+                'in': 'header',
+                'key': 'Authorization',
+                'value': 'Bearer ' + self.access_token
+            }
         if 'api_key' in self.api_key:
             auth['api_key'] = {
                 'type': 'api_key',
@@ -429,13 +440,6 @@ conf = petstore_api.Configuration(
                 'in': 'header',
                 'key': 'Authorization',
                 'value': self.get_basic_auth_token()
-            }
-        if self.access_token is not None:
-            auth['petstore_auth'] = {
-                'type': 'oauth2',
-                'in': 'header',
-                'key': 'Authorization',
-                'value': 'Bearer ' + self.access_token
             }
         return auth
 

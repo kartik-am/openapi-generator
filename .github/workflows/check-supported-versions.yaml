@@ -48,6 +48,8 @@ jobs:
       - name: Build with Maven
         shell: bash
         run: mvn -nsu -B --quiet -Djacoco.skip=true -Dorg.slf4j.simpleLogger.defaultLogLevel=error --no-transfer-progress clean install --file pom.xml ${{ matrix.flags }}
+        env:
+          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_ACCESS_KEY }}
 
       - name: Upload Maven build artifact
         uses: actions/upload-artifact@v3
@@ -63,6 +65,8 @@ jobs:
       - name: Test Maven plugin integration
         if: matrix.java == '8'
         shell: bash
+        env:
+          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_ACCESS_KEY }}
         run: |
           cd modules/openapi-generator-maven-plugin
           mvn verify -Pintegration
@@ -91,5 +95,7 @@ jobs:
           git config --global core.safecrlf false
           git config --global core.autocrlf true
           mvn clean package -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
-          # test with java (jersey2) client generation only as ensure-uptodate script is run in another job instead
+          # test with java (jersey2) client generation only as ensure-up-to-date script is run in another job instead
           ./bin/generate-samples.sh ./bin/configs/java-jersey2-8.yaml
+          # test debugSupportingFiles
+          ./bin/generate-samples.sh ./bin/configs/python.yaml -- --global-property debugSupportingFiles

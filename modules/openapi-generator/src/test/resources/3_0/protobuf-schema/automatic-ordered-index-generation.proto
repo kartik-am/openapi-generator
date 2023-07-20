@@ -1,4 +1,8 @@
 /*
+  Generation info:
+    - generator version: unset
+    - datetime: 2023-06-19T00:00Z[UTC]
+
   Automatic ordered index generation
 
   This specification is used as source for a test to demonstrate the behavior of the automatic ordered index generation (using the additional property numberedFieldNumberList=true) while taking into account the specified indexes and preventing from conflicts

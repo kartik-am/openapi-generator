@@ -1,0 +1,39 @@
+openapi: 3.0.2
+info:
+  description: This specification is used as a demonstration for the problem with $ref causing the generator to ignore additional information
+  version: 1.0.0
+  title: Google Wrapper Types
+paths:
+  /dummy:
+    get:
+      summary: A dummy endpoint to make the spec valid.
+      responses:
+        '200':
+          description: Success
+
+components:
+  schemas:
+    Var1:
+      type: object
+      properties:
+        test:
+          $ref: "#/components/schemas/test"
+          x-protobuf-index: 3
+        anotherTest:
+          $ref: "#/components/schemas/anotherTest"
+          x-protobuf-index: 2
+        workingIndex:
+          allOf:
+            - $ref: "#/components/schemas/test"
+          x-protobuf-index: 1
+    test:
+      type: object
+      properties:
+        var2:
+          type: boolean
+
+    anotherTest:
+      type: object
+      properties:
+        var3:
+          type: string

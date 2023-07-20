@@ -1,0 +1,36 @@
+openapi: 3.0.2
+info:
+  description: This specification is used as a demonstration for the Google Wrapper Types and the useWrapperTypes property
+  version: 1.0.0
+  title: Google Wrapper Types
+paths:
+  /dummy:
+    get:
+      summary: A dummy endpoint to make the spec valid.
+      responses:
+        '200':
+          description: Success
+
+components:
+  schemas:
+    Var1:
+      type: object
+      properties:
+        booleanVar:
+          type: bool
+        bytesVar:
+          type: bytes
+        stringVar:
+          type: string
+        uint32Var:
+          type: uint32
+        uint64Var:
+          type: uint64
+        int32Var:
+          type: int32
+        int64Var:
+          type: int64
+        floatVar:
+          type: float
+        doubleVar:
+          type: doubleVar

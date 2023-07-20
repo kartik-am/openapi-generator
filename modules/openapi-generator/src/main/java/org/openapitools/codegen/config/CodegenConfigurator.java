@@ -30,6 +30,7 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.commonmark.node.Link;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.api.TemplateDefinition;
 import org.openapitools.codegen.api.TemplatingEngineAdapter;
@@ -37,9 +38,12 @@ import org.openapitools.codegen.auth.AuthParser;
 import org.openapitools.codegen.utils.ModelUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.LoaderOptions;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -57,6 +61,8 @@ public class CodegenConfigurator {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(CodegenConfigurator.class);
 
+    private static final String UPDATE_REF_FIELD_PROPERTY_PARSING = "updateRefFieldPropertyParsing";
+    private static final String[] KEYS_EXCLUDED_FROM_RECURSIVE_REFERENCE_SEARCH = {"requestBodies"};
     private GeneratorSettings.Builder generatorSettingsBuilder = GeneratorSettings.newBuilder();
     private WorkflowSettings.Builder workflowSettingsBuilder = WorkflowSettings.newBuilder();
 
@@ -71,11 +77,11 @@ public class CodegenConfigurator {
     private Map<String, String> schemaMappings = new HashMap<>();
     private Map<String, String> inlineSchemaNameMappings = new HashMap<>();
     private Map<String, String> inlineSchemaNameDefaults = new HashMap<>();
+    private Map<String, String> openapiNormalizer = new HashMap<>();
     private Set<String> languageSpecificPrimitives = new HashSet<>();
     private Map<String, String> reservedWordsMappings = new HashMap<>();
     private Map<String, String> serverVariables = new HashMap<>();
     private String auth;
-
     private List<TemplateDefinition> userDefinedTemplates = new ArrayList<>();
 
     public CodegenConfigurator() {
@@ -122,6 +128,9 @@ public class CodegenConfigurator {
             }
             if(generatorSettings.getInlineSchemaNameDefaults() != null) {
                 configurator.inlineSchemaNameDefaults.putAll(generatorSettings.getInlineSchemaNameDefaults());
+            }
+            if(generatorSettings.getOpenAPINormalizer() != null) {
+                configurator.openapiNormalizer.putAll(generatorSettings.getOpenAPINormalizer());
             }
             if(generatorSettings.getLanguageSpecificPrimitives() != null) {
                 configurator.languageSpecificPrimitives.addAll(generatorSettings.getLanguageSpecificPrimitives());
@@ -207,6 +216,12 @@ public class CodegenConfigurator {
     public CodegenConfigurator addInlineSchemaNameDefault(String key, String value) {
         this.inlineSchemaNameDefaults.put(key, value);
         generatorSettingsBuilder.withInlineSchemaNameDefault(key, value);
+        return this;
+    }
+
+    public CodegenConfigurator addOpenAPINormalizer(String key, String value) {
+        this.openapiNormalizer.put(key, value);
+        generatorSettingsBuilder.withOpenAPINormalizer(key, value);
         return this;
     }
 
@@ -379,6 +394,12 @@ public class CodegenConfigurator {
     public CodegenConfigurator setInlineSchemaNameDefaults(Map<String, String> inlineSchemaNameDefaults) {
         this.inlineSchemaNameDefaults = inlineSchemaNameDefaults;
         generatorSettingsBuilder.withInlineSchemaNameDefaults(inlineSchemaNameDefaults);
+        return this;
+    }
+
+    public CodegenConfigurator setOpenAPINormalizer(Map<String, String> openapiNormalizer) {
+        this.openapiNormalizer = openapiNormalizer;
+        generatorSettingsBuilder.withOpenAPINormalizer(openapiNormalizer);
         return this;
     }
 
@@ -570,7 +591,16 @@ public class CodegenConfigurator {
         final List<AuthorizationValue> authorizationValues = AuthParser.parse(this.auth);
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        SwaggerParseResult result = new OpenAPIParser().readLocation(inputSpec, authorizationValues, options);
+        String entrySpec = this.inputSpec;
+        if (additionalProperties.containsKey(UPDATE_REF_FIELD_PROPERTY_PARSING)) {
+            entrySpec = updateInputSpecReference();
+        }
+        SwaggerParseResult result = new OpenAPIParser().readLocation(entrySpec, authorizationValues, options);
+
+        // Delete temporary spec file if created
+        if (!entrySpec.equals(this.inputSpec)) {
+            new File(entrySpec).delete();
+        }
 
         // TODO: Move custom validations to a separate type as part of a "Workflow"
         Set<String> validationMessages = new HashSet<>(null != result.getMessages() ? result.getMessages() : new ArrayList<>());
@@ -627,6 +657,64 @@ public class CodegenConfigurator {
         return new Context<>(specification, generatorSettings, workflowSettings);
     }
 
+    /*
+     * ODI-41 : Fix usage of x-protobuf-index for $ref fields
+     * this recursive method searches through a LinkedHashMap generated using snakeyaml.
+     * Once a $ref key is found this method apply the fix. It can also avoid searching in specific fields using the
+     * constant KEYS_EXCLUDED_FROM_RECURSIVE_REFERENCE_SEARCH
+     */
+    private void findAndReplaceReferenceInYamlMap(LinkedHashMap<String, LinkedHashMap> currentMap, boolean firstRun) {
+        for (String key : currentMap.keySet() ) {
+            if (currentMap.get(key) instanceof LinkedHashMap) {
+                LinkedHashMap value = currentMap.get(key);
+                if (firstRun) {
+                    if (("components").equals(key)) {
+                        findAndReplaceReferenceInYamlMap(value, false);
+                    }
+                } else {
+                    if (value.keySet().contains("$ref")) {
+                        ArrayList allOfList = new ArrayList<>();
+                        LinkedHashMap<String, String> allOfMap = new LinkedHashMap<>();
+
+                        // Always a String
+                        allOfMap.put("$ref", (String) value.get("$ref"));
+                        allOfList.add(allOfMap);
+
+                        value.remove("$ref");
+                        value.put("allOf", allOfList);
+                    } else if (!Arrays.asList(KEYS_EXCLUDED_FROM_RECURSIVE_REFERENCE_SEARCH).contains(key)) {
+                        findAndReplaceReferenceInYamlMap(value, false);
+                    }
+                }
+            }
+        }
+    }
+
+    /*
+     * ODI-41 : Fix usage of x-protobuf-index for $ref fields
+     * this method create a temporary file and write the updated inputSpec inside.
+     * it calls the recursive findAndReplaceReferenceInYamlMap method that applies the fix to $ref fields when required.
+     */
+    private String updateInputSpecReference() {
+        try {
+                File newInputSpec = Files.createTempFile("temporaryInputSpec", ".yaml").toFile();
+
+                LoaderOptions options = new LoaderOptions();
+                org.yaml.snakeyaml.Yaml yaml = new org.yaml.snakeyaml.Yaml(options);
+                LinkedHashMap inputSpecMap = yaml.load(Files.newInputStream(Paths.get(this.inputSpec)));
+                findAndReplaceReferenceInYamlMap(inputSpecMap, true);
+
+                FileOutputStream outputStream = new FileOutputStream(newInputSpec);
+                outputStream.write(yaml.dump(inputSpecMap).getBytes(StandardCharsets.UTF_8));
+                outputStream.close();
+
+                return newInputSpec.getPath();
+
+        } catch (IOException e) {
+            throw(new RuntimeException("Error reading or writing the updated inputSpec error cause is : " + e.getCause()));
+        }
+    }
+
     public ClientOptInput toClientOptInput() {
         Context<?> context = toContext();
         WorkflowSettings workflowSettings = context.getWorkflowSettings();
@@ -661,6 +749,7 @@ public class CodegenConfigurator {
         config.schemaMapping().putAll(generatorSettings.getSchemaMappings());
         config.inlineSchemaNameMapping().putAll(generatorSettings.getInlineSchemaNameMappings());
         config.inlineSchemaNameDefault().putAll(generatorSettings.getInlineSchemaNameDefaults());
+        config.openapiNormalizer().putAll(generatorSettings.getOpenAPINormalizer());
         config.languageSpecificPrimitives().addAll(generatorSettings.getLanguageSpecificPrimitives());
         config.reservedWordsMappings().putAll(generatorSettings.getReservedWordsMappings());
         config.additionalProperties().putAll(generatorSettings.getAdditionalProperties());

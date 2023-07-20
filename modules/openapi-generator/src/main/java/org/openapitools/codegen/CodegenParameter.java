@@ -29,16 +29,17 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
             isCookieParam, isBodyParam, isContainer,
             isCollectionFormatMulti, isPrimitiveType, isModel, isExplode, isDeepObject, isAllowEmptyValue;
     public String baseName, paramName, dataType, datatypeWithEnum, dataFormat, contentType,
-            collectionFormat, description, unescapedDescription, baseType, defaultValue, enumName, style;
+            collectionFormat, description, unescapedDescription, baseType, defaultValue, enumDefaultValue, enumName, style;
 
     public String nameInLowerCase; // property name in lower case
     public String example; // example value (x-example)
     public String jsonSchema;
     public boolean isString, isNumeric, isInteger, isLong, isNumber, isFloat, isDouble, isDecimal, isByteArray, isBinary,
-            isBoolean, isDate, isDateTime, isUuid, isUri, isEmail, isFreeFormObject, isAnyType, isShort, isUnboundedInteger;
+            isBoolean, isDate, isDateTime, isUuid, isUri, isEmail, isPassword, isFreeFormObject, isAnyType, isShort, isUnboundedInteger;
     public boolean isArray, isMap;
     public boolean isFile;
     public boolean isEnum;
+    public boolean isEnumRef; // true if the enum is a ref (model) but not defined inline
     private boolean additionalPropertiesIsAnyType;
     private boolean hasVars;
     public List<String> _enum;
@@ -99,6 +100,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
      * See http://json-schema.org/latest/json-schema-validation.html#anchor49
      */
     public boolean uniqueItems;
+    private Boolean uniqueItemsBoolean;
     /**
      * See http://json-schema.org/latest/json-schema-validation.html#anchor14
      */
@@ -106,11 +108,16 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
     private Integer maxProperties;
     private Integer minProperties;
     public boolean isNull;
+    public boolean isVoid = false;
     private boolean hasRequired;
     private boolean hasDiscriminatorWithNonEmptyMapping;
     private CodegenComposedSchemas composedSchemas;
     private boolean hasMultipleTypes = false;
     private LinkedHashMap<String, CodegenMediaType> content;
+    private Map<String, CodegenProperty> requiredVarsMap;
+    private String ref;
+
+    private boolean schemaIsFromAdditionalProperties;
 
     public CodegenParameter copy() {
         CodegenParameter output = new CodegenParameter();
@@ -146,11 +153,14 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
         output.maxItems = this.maxItems;
         output.minItems = this.minItems;
         output.uniqueItems = this.uniqueItems;
+        output.setUniqueItemsBoolean(this.uniqueItemsBoolean);
         output.multipleOf = this.multipleOf;
         output.jsonSchema = this.jsonSchema;
         output.defaultValue = this.defaultValue;
+        output.enumDefaultValue = this.enumDefaultValue;
         output.example = this.example;
         output.isEnum = this.isEnum;
+        output.isEnumRef = this.isEnumRef;
         output.maxProperties = this.maxProperties;
         output.minProperties = this.minProperties;
         output.maximum = this.maximum;
@@ -158,11 +168,13 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
         output.pattern = this.pattern;
         output.additionalProperties = this.additionalProperties;
         output.isNull = this.isNull;
+        output.isVoid = this.isVoid;
         output.setAdditionalPropertiesIsAnyType(this.getAdditionalPropertiesIsAnyType());
         output.setHasVars(this.hasVars);
         output.setHasRequired(this.hasRequired);
         output.setHasDiscriminatorWithNonEmptyMapping(this.hasDiscriminatorWithNonEmptyMapping);
         output.setHasMultipleTypes(this.hasMultipleTypes);
+        output.setSchemaIsFromAdditionalProperties(this.schemaIsFromAdditionalProperties);
 
         if (this.content != null) {
             output.setContent(this.content);
@@ -194,6 +206,12 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
         if (this.vendorExtensions != null) {
             output.vendorExtensions = new HashMap<String, Object>(this.vendorExtensions);
         }
+        if (this.requiredVarsMap != null) {
+            output.setRequiredVarsMap(this.requiredVarsMap);
+        }
+        if (this.ref != null) {
+            output.setRef(this.ref);
+        }
         output.hasValidation = this.hasValidation;
         output.isNullable = this.isNullable;
         output.isDeprecated = this.isDeprecated;
@@ -215,6 +233,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
         output.isUuid = this.isUuid;
         output.isUri = this.isUri;
         output.isEmail = this.isEmail;
+        output.isPassword = this.isPassword;
         output.isFreeFormObject = this.isFreeFormObject;
         output.isAnyType = this.isAnyType;
         output.isArray = this.isArray;
@@ -230,7 +249,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
 
     @Override
     public int hashCode() {
-        return Objects.hash(isFormParam, isQueryParam, isPathParam, isHeaderParam, isCookieParam, isBodyParam, isContainer, isCollectionFormatMulti, isPrimitiveType, isModel, isExplode, baseName, paramName, dataType, datatypeWithEnum, dataFormat, collectionFormat, description, unescapedDescription, baseType, defaultValue, enumName, style, isDeepObject, isAllowEmptyValue, example, jsonSchema, isString, isNumeric, isInteger, isLong, isNumber, isFloat, isDouble, isDecimal, isByteArray, isBinary, isBoolean, isDate, isDateTime, isUuid, isUri, isEmail, isFreeFormObject, isAnyType, isArray, isMap, isFile, isEnum, _enum, allowableValues, items, mostInnerItems, additionalProperties, vars, requiredVars, vendorExtensions, hasValidation, getMaxProperties(), getMinProperties(), isNullable, isDeprecated, required, getMaximum(), getExclusiveMaximum(), getMinimum(), getExclusiveMinimum(), getMaxLength(), getMinLength(), getPattern(), getMaxItems(), getMinItems(), getUniqueItems(), contentType, multipleOf, isNull, additionalPropertiesIsAnyType, hasVars, hasRequired, isShort, isUnboundedInteger, hasDiscriminatorWithNonEmptyMapping, composedSchemas, hasMultipleTypes, schema, content);
+        return Objects.hash(isFormParam, isQueryParam, isPathParam, isHeaderParam, isCookieParam, isBodyParam, isContainer, isCollectionFormatMulti, isPrimitiveType, isModel, isExplode, baseName, paramName, dataType, datatypeWithEnum, dataFormat, collectionFormat, description, unescapedDescription, baseType, defaultValue, enumDefaultValue, enumName, style, isDeepObject, isAllowEmptyValue, example, jsonSchema, isString, isNumeric, isInteger, isLong, isNumber, isFloat, isDouble, isDecimal, isByteArray, isBinary, isBoolean, isDate, isDateTime, isUuid, isUri, isEmail, isPassword, isFreeFormObject, isAnyType, isArray, isMap, isFile, isEnum, isEnumRef, _enum, allowableValues, items, mostInnerItems, additionalProperties, vars, requiredVars, vendorExtensions, hasValidation, getMaxProperties(), getMinProperties(), isNullable, isDeprecated, required, getMaximum(), getExclusiveMaximum(), getMinimum(), getExclusiveMinimum(), getMaxLength(), getMinLength(), getPattern(), getMaxItems(), getMinItems(), getUniqueItems(), contentType, multipleOf, isNull, isVoid, additionalPropertiesIsAnyType, hasVars, hasRequired, isShort, isUnboundedInteger, hasDiscriminatorWithNonEmptyMapping, composedSchemas, hasMultipleTypes, schema, content, requiredVarsMap, ref, uniqueItemsBoolean, schemaIsFromAdditionalProperties);
     }
 
     @Override
@@ -267,25 +286,32 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
                 isUuid == that.isUuid &&
                 isUri == that.isUri &&
                 isEmail == that.isEmail &&
+                isPassword == that.isPassword &&
                 isFreeFormObject == that.isFreeFormObject &&
                 isAnyType == that.isAnyType &&
                 isArray == that.isArray &&
                 isMap == that.isMap &&
                 isFile == that.isFile &&
                 isEnum == that.isEnum &&
+                isEnumRef == that.isEnumRef &&
                 hasValidation == that.hasValidation &&
                 isNullable == that.isNullable &&
                 isDeprecated == that.isDeprecated &&
                 required == that.required &&
                 isNull == that.isNull &&
+                isVoid == that.isVoid &&
                 hasDiscriminatorWithNonEmptyMapping == that.getHasDiscriminatorWithNonEmptyMapping() &&
                 getAdditionalPropertiesIsAnyType() == that.getAdditionalPropertiesIsAnyType() &&
                 hasMultipleTypes == that.getHasMultipleTypes() &&
+                getSchemaIsFromAdditionalProperties() == that.getSchemaIsFromAdditionalProperties() &&
                 getHasVars() == that.getHasVars() &&
                 getHasRequired() == that.getHasRequired() &&
                 getExclusiveMaximum() == that.getExclusiveMaximum() &&
                 getExclusiveMinimum() == that.getExclusiveMinimum() &&
                 getUniqueItems() == that.getUniqueItems() &&
+                Objects.equals(uniqueItemsBoolean, that.getUniqueItemsBoolean()) &&
+                Objects.equals(ref, that.getRef()) &&
+                Objects.equals(requiredVarsMap, that.getRequiredVarsMap()) &&
                 Objects.equals(content, that.getContent()) &&
                 Objects.equals(schema, that.getSchema()) &&
                 Objects.equals(composedSchemas, that.getComposedSchemas()) &&
@@ -299,6 +325,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
                 Objects.equals(unescapedDescription, that.unescapedDescription) &&
                 Objects.equals(baseType, that.baseType) &&
                 Objects.equals(defaultValue, that.defaultValue) &&
+                Objects.equals(enumDefaultValue, that.enumDefaultValue) &&
                 Objects.equals(enumName, that.enumName) &&
                 Objects.equals(style, that.style) &&
                 Objects.equals(isDeepObject, that.isDeepObject) &&
@@ -326,6 +353,15 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
                 Objects.equals(multipleOf, that.multipleOf);
     }
 
+    /**
+     * Return true if it's an enum (inline or ref)
+     *
+     * @return true if it's an enum (inline or ref)
+     */
+    public boolean getIsEnumOrRef() {
+        return isEnum || isEnumRef;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CodegenParameter{");
@@ -350,6 +386,7 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
         sb.append(", unescapedDescription='").append(unescapedDescription).append('\'');
         sb.append(", baseType='").append(baseType).append('\'');
         sb.append(", defaultValue='").append(defaultValue).append('\'');
+        sb.append(", enumDefaultValue='").append(enumDefaultValue).append('\'');
         sb.append(", enumName='").append(enumName).append('\'');
         sb.append(", style='").append(style).append('\'');
         sb.append(", deepObject='").append(isDeepObject).append('\'');
@@ -374,12 +411,14 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
         sb.append(", isUuid=").append(isUuid);
         sb.append(", isUri=").append(isUri);
         sb.append(", isEmail=").append(isEmail);
+        sb.append(", isPassword=").append(isPassword);
         sb.append(", isFreeFormObject=").append(isFreeFormObject);
         sb.append(", isAnyType=").append(isAnyType);
         sb.append(", isArray=").append(isArray);
         sb.append(", isMap=").append(isMap);
         sb.append(", isFile=").append(isFile);
         sb.append(", isEnum=").append(isEnum);
+        sb.append(", isEnumRef=").append(isEnumRef);
         sb.append(", _enum=").append(_enum);
         sb.append(", allowableValues=").append(allowableValues);
         sb.append(", items=").append(items);
@@ -404,9 +443,11 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
         sb.append(", maxItems=").append(maxItems);
         sb.append(", minItems=").append(minItems);
         sb.append(", uniqueItems=").append(uniqueItems);
+        sb.append(", uniqueItemsBoolean=").append(uniqueItemsBoolean);
         sb.append(", contentType=").append(contentType);
         sb.append(", multipleOf=").append(multipleOf);
         sb.append(", isNull=").append(isNull);
+        sb.append(", isVoid=").append(isVoid);
         sb.append(", getAdditionalPropertiesIsAnyType=").append(additionalPropertiesIsAnyType);
         sb.append(", getHasVars=").append(hasVars);
         sb.append(", getHasRequired=").append(hasRequired);
@@ -415,8 +456,66 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
         sb.append(", hasMultipleTypes=").append(hasMultipleTypes);
         sb.append(", schema=").append(schema);
         sb.append(", content=").append(content);
+        sb.append(", requiredVarsMap=").append(requiredVarsMap);
+        sb.append(", ref=").append(ref);
+        sb.append(", schemaIsFromAdditionalProperties=").append(schemaIsFromAdditionalProperties);
         sb.append('}');
         return sb.toString();
+    }
+
+    // use schema.getContains or content.mediaType.schema.getContains instead of this
+    @Override
+    public CodegenProperty getContains() {
+        return null;
+    }
+
+    // use schema.setContains or content.mediaType.schema.setContains instead of this
+    @Override
+    public void setContains(CodegenProperty contains) {
+    }
+
+    // use schema.getDependentRequired or content.mediaType.schema.getDependentRequired instead of this
+    @Override
+    public LinkedHashMap<String, List<String>> getDependentRequired() {
+        return null;
+    }
+
+    // use schema.setDependentRequired or content.mediaType.schema.setDependentRequired instead of this
+    @Override
+    public void setDependentRequired(LinkedHashMap<String, List<String>> dependentRequired) {
+    }
+
+    // use schema.getIsBooleanSchemaTrue or content.mediaType.schema.getIsBooleanSchemaTrue instead of this
+    @Override
+    public boolean getIsBooleanSchemaTrue() {
+        return false;
+    }
+
+    // use schema.setIsBooleanSchemaTrue or content.mediaType.schema.setIsBooleanSchemaTrue instead of this
+    @Override
+    public void setIsBooleanSchemaTrue(boolean isBooleanSchemaTrue) {
+    }
+
+    // use schema.getIsBooleanSchemaFalse or content.mediaType.schema.getIsBooleanSchemaFalse instead of this
+    @Override
+    public boolean getIsBooleanSchemaFalse() {
+        return false;
+    }
+
+    // use schema.setIsBooleanSchemaFalse or content.mediaType.schema.setIsBooleanSchemaFalse instead of this
+    @Override
+    public void setIsBooleanSchemaFalse(boolean isBooleanSchemaFalse) {
+    }
+
+    // use schema.getFormat or content.mediaType.schema.getFormat instead of this
+    @Override
+    public String getFormat() {
+        return null;
+    }
+
+    // use schema.setFormat or content.mediaType.schema.setFormat instead of this
+    @Override
+    public void setFormat(String format) {
     }
 
     @Override
@@ -517,6 +616,16 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
     @Override
     public void setUniqueItems(boolean uniqueItems) {
         this.uniqueItems = uniqueItems;
+    }
+
+    @Override
+    public Boolean getUniqueItemsBoolean() {
+        return uniqueItemsBoolean;
+    }
+
+    @Override
+    public void setUniqueItemsBoolean(Boolean uniqueItemsBoolean) {
+        this.uniqueItemsBoolean = uniqueItemsBoolean;
     }
 
     @Override
@@ -679,8 +788,12 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
         this.requiredVars = requiredVars;
     }
 
-    public boolean compulsory(){
+    public boolean requiredAndNotNullable() {
         return required && !isNullable;
+    }
+
+    public boolean notRequiredOrIsNullable() {
+        return !required || isNullable;
     }
 
     @Override
@@ -691,6 +804,16 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
     @Override
     public void setIsNull(boolean isNull) {
         this.isNull = isNull;
+    }
+
+    @Override
+    public boolean getIsVoid() {
+        return isVoid;
+    }
+
+    @Override
+    public void setIsVoid(boolean isVoid) {
+        this.isVoid = isVoid;
     }
 
     @Override
@@ -814,6 +937,36 @@ public class CodegenParameter implements IJsonSchemaValidationProperties {
     @Override
     public String getBaseType() {
         return baseType;
+    }
+
+    @Override
+    public Map<String, CodegenProperty> getRequiredVarsMap() {
+        return requiredVarsMap;
+    }
+
+    @Override
+    public void setRequiredVarsMap(Map<String, CodegenProperty> requiredVarsMap) {
+        this.requiredVarsMap = requiredVarsMap;
+    }
+
+    @Override
+    public String getRef() {
+        return ref;
+    }
+
+    @Override
+    public void setRef(String ref) {
+        this.ref = ref;
+    }
+
+    @Override
+    public boolean getSchemaIsFromAdditionalProperties() {
+        return schemaIsFromAdditionalProperties;
+    }
+
+    @Override
+    public void setSchemaIsFromAdditionalProperties(boolean schemaIsFromAdditionalProperties) {
+        this.schemaIsFromAdditionalProperties = schemaIsFromAdditionalProperties;
     }
 }
 

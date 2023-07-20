@@ -61,14 +61,14 @@ configuration = petstore_api.Configuration(
 
 
 # Enter a context with an instance of the API client
-with petstore_api.ApiClient(configuration) as api_client:
+async with petstore_api.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = petstore_api.AnotherFakeApi(api_client)
     body = petstore_api.Client() # Client | client model
 
     try:
         # To test special tags
-        api_response = api_instance.call_123_test_special_tags(body)
+        api_response = await api_instance.call_123_test_special_tags(body)
         pprint(api_response)
     except ApiException as e:
         print("Exception when calling AnotherFakeApi->call_123_test_special_tags: %s\n" % e)
@@ -172,29 +172,13 @@ Class | Method | HTTP request | Description
  - [XmlItem](docs/XmlItem.md)
 
 
+<a id="documentation-for-authorization"></a>
 ## Documentation For Authorization
 
 
-## api_key
-
-- **Type**: API key
-- **API key parameter name**: api_key
-- **Location**: HTTP header
-
-
-## api_key_query
-
-- **Type**: API key
-- **API key parameter name**: api_key_query
-- **Location**: URL query string
-
-
-## http_basic_test
-
-- **Type**: HTTP basic authentication
-
-
-## petstore_auth
+Authentication schemes defined for the API:
+<a id="petstore_auth"></a>
+### petstore_auth
 
 - **Type**: OAuth
 - **Flow**: implicit
@@ -202,6 +186,25 @@ Class | Method | HTTP request | Description
 - **Scopes**: 
  - **write:pets**: modify pets in your account
  - **read:pets**: read your pets
+
+<a id="api_key"></a>
+### api_key
+
+- **Type**: API key
+- **API key parameter name**: api_key
+- **Location**: HTTP header
+
+<a id="api_key_query"></a>
+### api_key_query
+
+- **Type**: API key
+- **API key parameter name**: api_key_query
+- **Location**: URL query string
+
+<a id="http_basic_test"></a>
+### http_basic_test
+
+- **Type**: HTTP basic authentication
 
 
 ## Author
