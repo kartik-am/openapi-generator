@@ -22,7 +22,7 @@ public class ProtobufVersion2SchemaCodegen extends ProtobufSchemaCodegen impleme
 
     @Override
     public String getName() {
-        return "protobuf-version-2-schema";
+        return "protobuf-schema-version-2";
     }
 
     @Override
@@ -34,8 +34,8 @@ public class ProtobufVersion2SchemaCodegen extends ProtobufSchemaCodegen impleme
         super();
 
         this.protoVersion = "proto2";
-        outputFolder = "generated-code" + File.separator + "protobuf-version-2-schema";
-        embeddedTemplateDir = templateDir = "protobuf-version-2-schema";
+        outputFolder = "generated-code" + File.separator + "protobuf-schema-version-2";
+        embeddedTemplateDir = templateDir = "protobuf-schema-version-2";
     }
 
     @Override
