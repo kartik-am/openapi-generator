@@ -42,8 +42,8 @@ import org.openapitools.codegen.config.GlobalSettings;
 import org.openapitools.codegen.api.TemplatingEngineAdapter;
 import org.openapitools.codegen.api.TemplateFileType;
 import org.openapitools.codegen.ignore.CodegenIgnoreProcessor;
+import org.openapitools.codegen.languages.PythonPriorClientCodegen;
 import org.openapitools.codegen.languages.PythonClientCodegen;
-import org.openapitools.codegen.languages.PythonExperimentalClientCodegen;
 import org.openapitools.codegen.meta.GeneratorMetadata;
 import org.openapitools.codegen.meta.Stability;
 import org.openapitools.codegen.model.ApiInfoMap;
@@ -257,6 +257,21 @@ public class DefaultGenerator implements Generator {
         }
 
         config.processOpts();
+
+        // normalize the spec
+        if (config.getUseOpenAPINormalizer()) {
+            OpenAPINormalizer openapiNormalizer = new OpenAPINormalizer(openAPI, config.openapiNormalizer());
+            openapiNormalizer.normalize();
+        }
+
+        // resolve inline models
+        if (config.getUseInlineModelResolver()) {
+            InlineModelResolver inlineModelResolver = new InlineModelResolver();
+            inlineModelResolver.setInlineSchemaNameMapping(config.inlineSchemaNameMapping());
+            inlineModelResolver.setInlineSchemaNameDefaults(config.inlineSchemaNameDefault());
+            inlineModelResolver.flatten(openAPI);
+        }
+
         config.preprocessOpenAPI(openAPI);
 
         // set OpenAPI to make these available to all methods
@@ -540,7 +555,7 @@ public class DefaultGenerator implements Generator {
                     // generators may choose to make models for use case 2 + 3
                     Schema refSchema = new Schema();
                     refSchema.set$ref("#/components/schemas/" + name);
-                    Schema unaliasedSchema = config.unaliasSchema(refSchema, config.schemaMapping());
+                    Schema unaliasedSchema = config.unaliasSchema(refSchema);
                     if (unaliasedSchema.get$ref() == null) {
                         LOGGER.info("Model {} not generated since it's a free-form object", name);
                         continue;
@@ -604,7 +619,7 @@ public class DefaultGenerator implements Generator {
                     ModelMap modelTemplate = modelList.get(0);
                     if (modelTemplate != null && modelTemplate.getModel() != null) {
                         CodegenModel m = modelTemplate.getModel();
-                        if (m.isAlias && !((config instanceof PythonClientCodegen) || (config instanceof PythonExperimentalClientCodegen))) {
+                        if (m.isAlias && !((config instanceof PythonPriorClientCodegen) || (config instanceof PythonClientCodegen))) {
                             // alias to number, string, enum, etc, which should not be generated as model
                             // for PythonClientCodegen, all aliases are generated as models
                             continue;  // Don't create user-defined classes for aliases
@@ -671,6 +686,20 @@ public class DefaultGenerator implements Generator {
                 operation.put("basePathWithoutHost", removeTrailingSlash(config.encodePath(url.getPath())));
                 operation.put("contextPath", contextPath);
                 operation.put("baseName", tag);
+                Optional.ofNullable(openAPI.getTags()).orElseGet(Collections::emptyList).stream()
+                        .map(Tag::getName)
+                        .filter(Objects::nonNull)
+                        .filter(tag::equalsIgnoreCase)
+                        .findFirst()
+                        .ifPresent(tagName -> operation.put("operationTagName", config.escapeText(tagName)));
+                operation.put("operationTagDescription", "");
+                Optional.ofNullable(openAPI.getTags()).orElseGet(Collections::emptyList).stream()
+                        .filter(t -> tag.equalsIgnoreCase(t.getName()))
+                        .map(Tag::getDescription)
+                        .filter(Objects::nonNull)
+                        .findFirst()
+                        .ifPresent(description -> operation.put("operationTagDescription", config.escapeText(description)));
+                Optional.ofNullable(config.additionalProperties().get("appVersion")).ifPresent(version -> operation.put("version", version));
                 operation.put("apiPackage", config.apiPackage());
                 operation.put("modelPackage", config.modelPackage());
                 operation.putAll(config.additionalProperties());
@@ -679,6 +708,8 @@ public class DefaultGenerator implements Generator {
                 operation.put("importPath", config.toApiImport(tag));
                 operation.put("classFilename", config.toApiFilename(tag));
                 operation.put("strictSpecBehavior", config.isStrictSpecBehavior());
+                Optional.ofNullable(openAPI.getInfo()).map(Info::getLicense).ifPresent(license -> operation.put("license", license));
+                Optional.ofNullable(openAPI.getInfo()).map(Info::getContact).ifPresent(contact -> operation.put("contact", contact));
 
                 if (allModels == null || allModels.isEmpty()) {
                     operation.put("hasModel", false);
@@ -790,14 +821,17 @@ public class DefaultGenerator implements Generator {
                     outputFolder += File.separator + support.getFolder();
                 }
                 File of = new File(outputFolder);
-                if (!of.isDirectory()) {
-                    if (!dryRun && !of.mkdirs()) {
-                        once(LOGGER).debug("Output directory {} not created. It {}.", outputFolder, of.exists() ? "already exists." : "may not have appropriate permissions.");
-                    }
-                }
                 String outputFilename = new File(support.getDestinationFilename()).isAbsolute() // split
                         ? support.getDestinationFilename()
                         : outputFolder + File.separator + support.getDestinationFilename().replace('/', File.separatorChar);
+
+                if (!of.isDirectory()) {
+                    // check that its not a dryrun and the files in the directory aren't ignored before we make the directory
+                    if (!dryRun && ignoreProcessor.allowsFile(new File(outputFilename)) && !of.mkdirs()) {
+                        once(LOGGER).debug("Output directory {} not created. It {}.", outputFolder, of.exists() ? "already exists." : "may not have appropriate permissions.");
+                    }
+                }
+
 
                 boolean shouldGenerate = true;
                 if (supportingFilesToGenerate != null && !supportingFilesToGenerate.isEmpty()) {
@@ -880,6 +914,11 @@ public class DefaultGenerator implements Generator {
             bundle.put("hasServers", true);
         }
 
+        boolean hasOperationServers = allOperations != null && allOperations.stream()
+                .flatMap(om -> om.getOperations().getOperation().stream())
+                .anyMatch(o -> o.servers != null && !o.servers.isEmpty());
+        bundle.put("hasOperationServers", hasOperationServers);
+
         if (openAPI.getExternalDocs() != null) {
             bundle.put("externalDocs", openAPI.getExternalDocs());
         }
@@ -920,6 +959,10 @@ public class DefaultGenerator implements Generator {
             if (ProcessUtils.hasOAuthMethods(authMethods)) {
                 bundle.put("hasOAuthMethods", true);
                 bundle.put("oauthMethods", ProcessUtils.getOAuthMethods(authMethods));
+            }
+            if (ProcessUtils.hasOpenIdConnectMethods(authMethods)) {
+                bundle.put("hasOpenIdConnectMethods", true);
+                bundle.put("openIdConnectMethods", ProcessUtils.getOpenIdConnectMethods(authMethods));
             }
             if (ProcessUtils.hasHttpBearerMethods(authMethods)) {
                 bundle.put("hasHttpBearerMethods", true);
@@ -965,14 +1008,6 @@ public class DefaultGenerator implements Generator {
             } else {
                 LOGGER.info(stabilityMessage);
             }
-        }
-
-        // resolve inline models
-        if (config.getUseInlineModelResolver()) {
-            InlineModelResolver inlineModelResolver = new InlineModelResolver();
-            inlineModelResolver.setInlineSchemaNameMapping(config.inlineSchemaNameMapping());
-            inlineModelResolver.setInlineSchemaNameDefaults(config.inlineSchemaNameDefault());
-            inlineModelResolver.flatten(openAPI);
         }
 
         configureGeneratorProperties();
@@ -1282,16 +1317,18 @@ public class DefaultGenerator implements Generator {
         objs.setClassname(config.toApiName(tag));
         objs.setPathPrefix(config.toApiVarName(tag));
 
-        // check for operationId uniqueness
-        Set<String> opIds = new HashSet<>();
-        int counter = 0;
-        for (CodegenOperation op : ops) {
-            String opId = op.nickname;
-            if (opIds.contains(opId)) {
-                counter++;
-                op.nickname += "_" + counter;
+        // check for nickname uniqueness
+        if (config.getAddSuffixToDuplicateOperationNicknames()) {
+            Set<String> opIds = new HashSet<>();
+            int counter = 0;
+            for (CodegenOperation op : ops) {
+                String opId = op.nickname;
+                if (opIds.contains(opId)) {
+                    counter++;
+                    op.nickname += "_" + counter;
+                }
+                opIds.add(opId);
             }
-            opIds.add(opId);
         }
         objs.setOperation(ops);
 
@@ -1346,7 +1383,7 @@ public class DefaultGenerator implements Generator {
      */
     private Set<Map<String, String>> toImportsObjects(Map<String, String> mappedImports) {
         Set<Map<String, String>> result = new TreeSet<>(
-            Comparator.comparing(o -> o.get("classname"))
+                Comparator.comparing(o -> o.get("classname"))
         );
 
         mappedImports.forEach((key, value) -> {
@@ -1470,6 +1507,32 @@ public class DefaultGenerator implements Generator {
                         }
 
                         authMethods.put(key, oauthUpdatedScheme);
+                    } else if (securityScheme.getType().equals(SecurityScheme.Type.OPENIDCONNECT)) {
+                        // Security scheme only allows to add scope in Flows, so randomly using authorization code flow
+                        OAuthFlows openIdConnectUpdatedFlows = new OAuthFlows();
+                        OAuthFlow flow = new OAuthFlow();
+                        Scopes flowScopes = new Scopes();
+                        securities.stream()
+                                .map(secReq -> secReq.get(key))
+                                .filter(Objects::nonNull)
+                                .flatMap(List::stream)
+                                .forEach(value -> flowScopes.put(value, value));
+                        flow.scopes(flowScopes);
+                        openIdConnectUpdatedFlows.authorizationCode(flow);
+
+                        SecurityScheme openIdConnectUpdatedScheme = new SecurityScheme()
+                                .type(securityScheme.getType())
+                                .description(securityScheme.getDescription())
+                                .name(securityScheme.getName())
+                                .$ref(securityScheme.get$ref())
+                                .in(securityScheme.getIn())
+                                .scheme(securityScheme.getScheme())
+                                .bearerFormat(securityScheme.getBearerFormat())
+                                .openIdConnectUrl(securityScheme.getOpenIdConnectUrl())
+                                .extensions(securityScheme.getExtensions())
+                                .flows(openIdConnectUpdatedFlows);
+
+                        authMethods.put(key, openIdConnectUpdatedScheme);
                     } else {
                         authMethods.put(key, securityScheme);
                     }
