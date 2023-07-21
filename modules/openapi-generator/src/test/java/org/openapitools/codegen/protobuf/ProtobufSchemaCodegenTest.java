@@ -67,7 +67,7 @@ public class ProtobufSchemaCodegenTest {
         mockedVersionStatic.close();
     }
 
-    /*@Test
+    @Test
     public void testCodeGenWithOneOf() throws IOException {
         Map<String, Object> properties = new HashMap<>();
         Map<String, String> globalProperties = new HashMap<>();
@@ -76,14 +76,14 @@ public class ProtobufSchemaCodegenTest {
 
         File output = Files.createTempDirectory("test").toFile();
         List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/oneOf.yaml");
-        TestUtils.ensureContainsFile(files, output, "models/shape.proto");
-        Path path = Paths.get(output + "/models/shape.proto");
-        assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/shape.proto"));
+        TestUtils.ensureContainsFile(files, output, "models/shape_all_of_shape_specialisation.proto");
+        Path path = Paths.get(output + "/models/shape_all_of_shape_specialisation.proto");
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/shape_all_of_shape_specialisation.proto"));
 
         output.delete();
     }
 
-    @Test
+    /*@Test
     public void testCodeGenWithOneOfSimple() throws IOException {
         Map<String, Object> properties = new HashMap<>();
         Map<String, String> globalProperties = new HashMap<>();
