@@ -23,6 +23,7 @@ import org.openapitools.codegen.DefaultGenerator;
 import org.openapitools.codegen.TestUtils;
 import org.openapitools.codegen.config.CodegenConfigurator;
 import org.openapitools.codegen.languages.ProtobufVersion2SchemaCodegen;
+import org.openapitools.codegen.utils.ImplementationVersion;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -48,19 +49,24 @@ import java.util.Map;
 
 public class ProtobufVersion2SchemaCodegenTest {
 
-    private static MockedStatic<ZonedDateTime> mockedStatic;
+    private static MockedStatic<ZonedDateTime> mockedDateStatic;
+
+    private static MockedStatic<ImplementationVersion> mockedVersionStatic;
 
     @BeforeClass
     public void setup() {
         Clock clock = Clock.fixed(Instant.parse("2023-06-19T00:00:00Z"), ZoneId.of("UTC"));
         ZonedDateTime expectedDate = ZonedDateTime.now(clock);
-        mockedStatic = mockStatic(ZonedDateTime.class);
-        mockedStatic.when(ZonedDateTime::now).thenReturn(expectedDate);
+        mockedDateStatic = mockStatic(ZonedDateTime.class);
+        mockedDateStatic.when(ZonedDateTime::now).thenReturn(expectedDate);
+        mockedVersionStatic = mockStatic(ImplementationVersion.class);
+        mockedVersionStatic.when(ImplementationVersion::read).thenReturn("N/A");
     }
 
     @AfterClass
     public void finish() {
-        mockedStatic.close();
+        mockedDateStatic.close();
+        mockedVersionStatic.close();
     }
 
     @Test
