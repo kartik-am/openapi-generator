@@ -330,7 +330,31 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
                 model.getVars().add(discriminatorProperty);
             }
         }
+
+        if (!model.oneOf.isEmpty()) {
+            updateOneOfString(model);
+        }
+
         return model;
+    }
+
+    private void updateOneOfString(CodegenModel model) {
+        Set<String> newOneOf = new TreeSet<>();
+        model.oneOfName = model.name.substring(model.name.lastIndexOf("_") + 1, model.name.lastIndexOf("_") + 2).toLowerCase(Locale.ROOT) + model.name.substring(model.name.lastIndexOf("_") + 2);
+        for (String oneOf : model.oneOf) {
+            for (CodegenProperty prop : model.getComposedSchemas().getOneOf()) {
+                if (prop.dataType.endsWith(oneOf)) {
+                    String name = oneOf.toLowerCase(Locale.ROOT);
+                    try {
+                        newOneOf.add(oneOf + " " + name + " = " + generateFieldNumberFromString(name));
+                    } catch (ProtoBufIndexComputationException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+            }
+        }
+        model.oneOf = newOneOf;
     }
 
     /**

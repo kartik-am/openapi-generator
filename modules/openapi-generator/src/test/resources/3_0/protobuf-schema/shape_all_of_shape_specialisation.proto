@@ -33,9 +33,9 @@ message ShapeAllOfShapeSpecialisation {
   int32 size = 3530753;
 
 
-  oneof {
-    Rectangle
-    Square
-    Triangle
+  oneof shapeSpecialisation {
+    Rectangle rectangle = 47558001;
+    Square square = 357803748;
+    Triangle triangle = 424020490;
   }
 }

@@ -1,4 +1,8 @@
 /*
+  Generation info:
+    - generator version: N/A
+    - datetime: 2023-06-19T00:00Z[UTC]
+
   AllOf
 
   This specification is used as a demonstration for allOf
@@ -12,18 +16,26 @@ syntax = "proto3";
 
 package openapitools;
 
-import "models/one_of_triangle_rectangle_square.proto";
-
+import "models/rectangle.proto";
+import "models/square.proto";
+import "models/triangle.proto";
 
 message Shape {
 
-  enum ShapeType {
-    SHAPE_TYPE_TRIANGLE = 0;
-    SHAPE_TYPE_RECTANGLE = 1;
-    SHAPE_TYPE_SQUARE = 2;
+  int32 angle = 92960979;
+
+  int32 length = 32621852;
+
+  bool color = 94842723;
+
+  int32 width = 113126854;
+
+  int32 size = 3530753;
+
+
+  oneof shape {
+    Rectangle rectangle = 47558001;
+    Square square = 357803748;
+    Triangle triangle = 424020490;
   }
-
-  ShapeType shapeType = 28665224;
-
-  OneOfTriangleRectangleSquare ShapeSpecialisation = 508066579;
 }
