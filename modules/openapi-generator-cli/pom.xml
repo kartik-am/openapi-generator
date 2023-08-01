@@ -4,7 +4,7 @@
         <groupId>org.openapitools</groupId>
         <artifactId>openapi-generator-project</artifactId>
         <!-- RELEASE_VERSION -->
-        <version>6.6.0-amadeus</version>
+        <version>6.6.1-amadeus</version>
         <!-- /RELEASE_VERSION -->
         <relativePath>../..</relativePath>
     </parent>
@@ -16,7 +16,7 @@
     <name>openapi-generator (executable)</name>
 
     <build>
-        <finalName>${project.artifactId}-v${project.version}</finalName>
+        <finalName>${project.artifactId}-${project.version}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

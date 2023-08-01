@@ -42,9 +42,9 @@ import {{#publicImports}}public {{/publicImports}}"{{{import}}}.proto";
 
   {{#oneOf}}
   {{#-first}}
-  oneof {
+  oneof {{oneOfName}} {
   {{/-first}}
-    {{.}}
+    {{{.}}};
   {{#-last}}
   }
   {{/-last}}

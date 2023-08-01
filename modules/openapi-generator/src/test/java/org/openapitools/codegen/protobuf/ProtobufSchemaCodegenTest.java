@@ -83,7 +83,7 @@ public class ProtobufSchemaCodegenTest {
         output.delete();
     }
 
-    /*@Test
+    @Test
     public void testCodeGenWithOneOfSimple() throws IOException {
         Map<String, Object> properties = new HashMap<>();
         Map<String, String> globalProperties = new HashMap<>();
@@ -94,10 +94,10 @@ public class ProtobufSchemaCodegenTest {
         List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/oneOfSimple.yaml");
         TestUtils.ensureContainsFile(files, output, "models/shape.proto");
         Path path = Paths.get(output + "/models/shape.proto");
-        assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/shape.proto"));
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/shape.proto"));
 
         output.delete();
-    }*/
+    }
 
     @Test
     public void testCodeGen() throws IOException {

@@ -47,6 +47,7 @@ public class CodegenModel implements IJsonSchemaValidationProperties {
     public List<CodegenModel> children;
 
     // anyOf, oneOf, allOf
+    public String oneOfName;
     public Set<String> anyOf = new TreeSet<>();
     public Set<String> oneOf = new TreeSet<>();
     public Set<String> allOf = new TreeSet<>();

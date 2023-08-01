@@ -739,7 +739,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.android.tools.build:gradle:3.5.0'
         classpath('org.openapitools:openapi-generator-gradle-plugin:6.3.0') {
             exclude group: 'com.google.guava'
         }
