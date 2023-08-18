@@ -1528,9 +1528,9 @@ components:
     EnumClass:
       default: -efg
       enum:
-      - _abc
-      - -efg
-      - (xyz)
+      - ENUM_CLASS__ABC
+      - ENUM_CLASS__EFG
+      - ENUM_CLASS_(XYZ)
       type: string
     Enum_Test:
       properties:
@@ -1813,9 +1813,9 @@ components:
       type: object
     OuterEnum:
       enum:
-      - placed
-      - approved
-      - delivered
+      - OUTER_ENUM_PLACED
+      - OUTER_ENUM_APPROVED
+      - OUTER_ENUM_DELIVERED
       type: string
     OuterComposite:
       example:

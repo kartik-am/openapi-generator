@@ -1,3 +1,9 @@
+/*
+ * Generation info:
+ *   - generator version: 6.6.1-amadeus
+ *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
+ */
+
 package org.openapitools.model;
 
 import io.swagger.annotations.ApiModel;
@@ -16,40 +22,105 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 @JsonTypeName("XmlItem")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen")
 public class XmlItem  implements Serializable {
+  
+  
   private @Valid String attributeString;
+
+  
   private @Valid BigDecimal attributeNumber;
+
+  
   private @Valid Integer attributeInteger;
+
+  
   private @Valid Boolean attributeBoolean;
+
+  
   private @Valid List<Integer> wrappedArray;
+
+  
   private @Valid String nameString;
+
+  
   private @Valid BigDecimal nameNumber;
+
+  
   private @Valid Integer nameInteger;
+
+  
   private @Valid Boolean nameBoolean;
+
+  
   private @Valid List<Integer> nameArray;
+
+  
   private @Valid List<Integer> nameWrappedArray;
+
+  
   private @Valid String prefixString;
+
+  
   private @Valid BigDecimal prefixNumber;
+
+  
   private @Valid Integer prefixInteger;
+
+  
   private @Valid Boolean prefixBoolean;
+
+  
   private @Valid List<Integer> prefixArray;
+
+  
   private @Valid List<Integer> prefixWrappedArray;
+
+  
   private @Valid String namespaceString;
+
+  
   private @Valid BigDecimal namespaceNumber;
+
+  
   private @Valid Integer namespaceInteger;
+
+  
   private @Valid Boolean namespaceBoolean;
+
+  
   private @Valid List<Integer> namespaceArray;
+
+  
   private @Valid List<Integer> namespaceWrappedArray;
+
+  
   private @Valid String prefixNsString;
+
+  
   private @Valid BigDecimal prefixNsNumber;
+
+  
   private @Valid Integer prefixNsInteger;
+
+  
   private @Valid Boolean prefixNsBoolean;
+
+  
   private @Valid List<Integer> prefixNsArray;
+
+  
   private @Valid List<Integer> prefixNsWrappedArray;
+
+  
 
   protected XmlItem(XmlItemBuilder<?, ?> b) {
     this.attributeString = b.attributeString;
@@ -94,6 +165,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "string", value = "")
   @JsonProperty("attribute_string")
   public String getAttributeString() {
@@ -112,6 +184,7 @@ public class XmlItem  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(example = "1.234", value = "")
   @JsonProperty("attribute_number")
@@ -132,6 +205,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "-2", value = "")
   @JsonProperty("attribute_integer")
   public Integer getAttributeInteger() {
@@ -151,6 +225,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "true", value = "")
   @JsonProperty("attribute_boolean")
   public Boolean getAttributeBoolean() {
@@ -169,6 +244,7 @@ public class XmlItem  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("wrapped_array")
@@ -205,6 +281,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "string", value = "")
   @JsonProperty("name_string")
   public String getNameString() {
@@ -223,6 +300,7 @@ public class XmlItem  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(example = "1.234", value = "")
   @JsonProperty("name_number")
@@ -243,6 +321,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "-2", value = "")
   @JsonProperty("name_integer")
   public Integer getNameInteger() {
@@ -262,6 +341,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "true", value = "")
   @JsonProperty("name_boolean")
   public Boolean getNameBoolean() {
@@ -280,6 +360,7 @@ public class XmlItem  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("name_array")
@@ -316,6 +397,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("name_wrapped_array")
   public List<Integer> getNameWrappedArray() {
@@ -351,6 +433,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "string", value = "")
   @JsonProperty("prefix_string")
   public String getPrefixString() {
@@ -369,6 +452,7 @@ public class XmlItem  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(example = "1.234", value = "")
   @JsonProperty("prefix_number")
@@ -389,6 +473,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "-2", value = "")
   @JsonProperty("prefix_integer")
   public Integer getPrefixInteger() {
@@ -408,6 +493,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "true", value = "")
   @JsonProperty("prefix_boolean")
   public Boolean getPrefixBoolean() {
@@ -426,6 +512,7 @@ public class XmlItem  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("prefix_array")
@@ -462,6 +549,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("prefix_wrapped_array")
   public List<Integer> getPrefixWrappedArray() {
@@ -497,6 +585,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "string", value = "")
   @JsonProperty("namespace_string")
   public String getNamespaceString() {
@@ -515,6 +604,7 @@ public class XmlItem  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(example = "1.234", value = "")
   @JsonProperty("namespace_number")
@@ -535,6 +625,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "-2", value = "")
   @JsonProperty("namespace_integer")
   public Integer getNamespaceInteger() {
@@ -554,6 +645,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "true", value = "")
   @JsonProperty("namespace_boolean")
   public Boolean getNamespaceBoolean() {
@@ -572,6 +664,7 @@ public class XmlItem  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("namespace_array")
@@ -608,6 +701,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("namespace_wrapped_array")
   public List<Integer> getNamespaceWrappedArray() {
@@ -643,6 +737,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "string", value = "")
   @JsonProperty("prefix_ns_string")
   public String getPrefixNsString() {
@@ -661,6 +756,7 @@ public class XmlItem  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(example = "1.234", value = "")
   @JsonProperty("prefix_ns_number")
@@ -681,6 +777,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "-2", value = "")
   @JsonProperty("prefix_ns_integer")
   public Integer getPrefixNsInteger() {
@@ -700,6 +797,7 @@ public class XmlItem  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "true", value = "")
   @JsonProperty("prefix_ns_boolean")
   public Boolean getPrefixNsBoolean() {
@@ -718,6 +816,7 @@ public class XmlItem  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("prefix_ns_array")
@@ -753,6 +852,7 @@ public class XmlItem  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("prefix_ns_wrapped_array")
@@ -1045,5 +1145,19 @@ public class XmlItem  implements Serializable {
       return self();
     }
   }
+
+  
+  private Map<String, Object> unknown = new HashMap<>();
+
+  @JsonAnyGetter
+  public Map<String, Object> getUnknown() {
+    return unknown;
+  }
+
+  @JsonAnySetter
+  public void addUnknown(String key, Object value) {
+    unknown.put(key, value);
+  }
+  
 }
 
