@@ -1,3 +1,9 @@
+/*
+ * Generation info:
+ *   - generator version: 6.6.1-amadeus
+ *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
+ */
+
 package org.openapitools.model;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -15,12 +21,19 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 @JsonTypeName("Enum_Test")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen")
 public class EnumTest  implements Serializable {
-  public enum EnumStringEnum {
+  
+
+public enum EnumStringEnum {
 
     UPPER(String.valueOf("UPPER")), LOWER(String.valueOf("lower")), EMPTY(String.valueOf(""));
 
@@ -67,8 +80,11 @@ public class EnumTest  implements Serializable {
     }
 }
 
+  
   private @Valid EnumStringEnum enumString;
-  public enum EnumStringRequiredEnum {
+
+
+public enum EnumStringRequiredEnum {
 
     UPPER(String.valueOf("UPPER")), LOWER(String.valueOf("lower")), EMPTY(String.valueOf(""));
 
@@ -115,8 +131,11 @@ public class EnumTest  implements Serializable {
     }
 }
 
+  
   private @Valid EnumStringRequiredEnum enumStringRequired;
-  public enum EnumIntegerEnum {
+
+
+public enum EnumIntegerEnum {
 
     NUMBER_1(Integer.valueOf(1)), NUMBER_MINUS_1(Integer.valueOf(-1));
 
@@ -163,8 +182,11 @@ public class EnumTest  implements Serializable {
     }
 }
 
+  
   private @Valid EnumIntegerEnum enumInteger;
-  public enum EnumNumberEnum {
+
+
+public enum EnumNumberEnum {
 
     NUMBER_1_DOT_1(Double.valueOf(1.1)), NUMBER_MINUS_1_DOT_2(Double.valueOf(-1.2));
 
@@ -211,8 +233,13 @@ public class EnumTest  implements Serializable {
     }
 }
 
+  
   private @Valid EnumNumberEnum enumNumber;
+
+  
   private @Valid OuterEnum outerEnum;
+
+  
 
   protected EnumTest(EnumTestBuilder<?, ?> b) {
     this.enumString = b.enumString;
@@ -233,6 +260,7 @@ public class EnumTest  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("enum_string")
   public EnumStringEnum getEnumString() {
@@ -251,6 +279,7 @@ public class EnumTest  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("enum_string_required")
@@ -272,6 +301,7 @@ public class EnumTest  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("enum_integer")
   public EnumIntegerEnum getEnumInteger() {
@@ -291,6 +321,7 @@ public class EnumTest  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("enum_number")
   public EnumNumberEnum getEnumNumber() {
@@ -309,6 +340,7 @@ public class EnumTest  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("outerEnum")
@@ -417,5 +449,19 @@ public class EnumTest  implements Serializable {
       return self();
     }
   }
+
+  
+  private Map<String, Object> unknown = new HashMap<>();
+
+  @JsonAnyGetter
+  public Map<String, Object> getUnknown() {
+    return unknown;
+  }
+
+  @JsonAnySetter
+  public void addUnknown(String key, Object value) {
+    unknown.put(key, value);
+  }
+  
 }
 

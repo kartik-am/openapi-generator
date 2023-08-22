@@ -1,3 +1,9 @@
+/*
+ * Generation info:
+ *   - generator version: 6.6.1-amadeus
+ *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
+ */
+
 package org.openapitools.model;
 
 import io.swagger.annotations.ApiModel;
@@ -15,13 +21,22 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 @JsonTypeName("MapTest")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen")
 public class MapTest  implements Serializable {
+  
+  
   private @Valid Map<String, Map<String, String>> mapMapOfString = new HashMap<>();
-  public enum InnerEnum {
+
+
+public enum InnerEnum {
 
     UPPER(String.valueOf("UPPER")), LOWER(String.valueOf("lower"));
 
@@ -68,9 +83,16 @@ public class MapTest  implements Serializable {
     }
 }
 
+  
   private @Valid Map<String, InnerEnum> mapOfEnumString = new HashMap<>();
+
+  
   private @Valid Map<String, Boolean> directMap = new HashMap<>();
+
+  
   private @Valid Map<String, Boolean> indirectMap = new HashMap<>();
+
+  
 
   protected MapTest(MapTestBuilder<?, ?> b) {
     this.mapMapOfString = b.mapMapOfString;
@@ -89,6 +111,7 @@ public class MapTest  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("map_map_of_string")
@@ -125,6 +148,7 @@ public class MapTest  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("map_of_enum_string")
   public Map<String, InnerEnum> getMapOfEnumString() {
@@ -160,6 +184,7 @@ public class MapTest  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("direct_map")
   public Map<String, Boolean> getDirectMap() {
@@ -194,6 +219,7 @@ public class MapTest  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("indirect_map")
@@ -311,5 +337,19 @@ public class MapTest  implements Serializable {
       return self();
     }
   }
+
+  
+  private Map<String, Object> unknown = new HashMap<>();
+
+  @JsonAnyGetter
+  public Map<String, Object> getUnknown() {
+    return unknown;
+  }
+
+  @JsonAnySetter
+  public void addUnknown(String key, Object value) {
+    unknown.put(key, value);
+  }
+  
 }
 

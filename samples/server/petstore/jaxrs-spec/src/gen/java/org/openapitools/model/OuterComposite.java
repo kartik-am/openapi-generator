@@ -1,3 +1,9 @@
+/*
+ * Generation info:
+ *   - generator version: 6.6.1-amadeus
+ *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
+ */
+
 package org.openapitools.model;
 
 import io.swagger.annotations.ApiModel;
@@ -14,14 +20,27 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 @JsonTypeName("OuterComposite")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen")
 public class OuterComposite  implements Serializable {
+  
+  
   private @Valid BigDecimal myNumber;
+
+  
   private @Valid String myString;
+
+  
   private @Valid Boolean myBoolean;
+
+  
 
   protected OuterComposite(OuterCompositeBuilder<?, ?> b) {
     this.myNumber = b.myNumber;
@@ -39,6 +58,7 @@ public class OuterComposite  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("my_number")
@@ -59,6 +79,7 @@ public class OuterComposite  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("my_string")
   public String getMyString() {
@@ -77,6 +98,7 @@ public class OuterComposite  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("my_boolean")
@@ -171,5 +193,19 @@ public class OuterComposite  implements Serializable {
       return self();
     }
   }
+
+  
+  private Map<String, Object> unknown = new HashMap<>();
+
+  @JsonAnyGetter
+  public Map<String, Object> getUnknown() {
+    return unknown;
+  }
+
+  @JsonAnySetter
+  public void addUnknown(String key, Object value) {
+    unknown.put(key, value);
+  }
+  
 }
 

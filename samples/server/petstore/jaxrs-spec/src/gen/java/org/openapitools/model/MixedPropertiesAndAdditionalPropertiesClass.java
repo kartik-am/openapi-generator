@@ -1,3 +1,9 @@
+/*
+ * Generation info:
+ *   - generator version: 6.6.1-amadeus
+ *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
+ */
+
 package org.openapitools.model;
 
 import io.swagger.annotations.ApiModel;
@@ -18,14 +24,27 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 @JsonTypeName("MixedPropertiesAndAdditionalPropertiesClass")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen")
 public class MixedPropertiesAndAdditionalPropertiesClass  implements Serializable {
+  
+  
   private @Valid UUID uuid;
+
+  
   private @Valid Date dateTime;
+
+  
   private @Valid Map<String, Animal> map = new HashMap<>();
+
+  
 
   protected MixedPropertiesAndAdditionalPropertiesClass(MixedPropertiesAndAdditionalPropertiesClassBuilder<?, ?> b) {
     this.uuid = b.uuid;
@@ -43,6 +62,7 @@ public class MixedPropertiesAndAdditionalPropertiesClass  implements Serializabl
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("uuid")
@@ -63,6 +83,7 @@ public class MixedPropertiesAndAdditionalPropertiesClass  implements Serializabl
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("dateTime")
   public Date getDateTime() {
@@ -81,6 +102,7 @@ public class MixedPropertiesAndAdditionalPropertiesClass  implements Serializabl
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("map")
@@ -191,5 +213,19 @@ public class MixedPropertiesAndAdditionalPropertiesClass  implements Serializabl
       return self();
     }
   }
+
+  
+  private Map<String, Object> unknown = new HashMap<>();
+
+  @JsonAnyGetter
+  public Map<String, Object> getUnknown() {
+    return unknown;
+  }
+
+  @JsonAnySetter
+  public void addUnknown(String key, Object value) {
+    unknown.put(key, value);
+  }
+  
 }
 

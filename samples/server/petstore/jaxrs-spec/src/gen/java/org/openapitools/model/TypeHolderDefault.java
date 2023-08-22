@@ -1,3 +1,9 @@
+/*
+ * Generation info:
+ *   - generator version: 6.6.1-amadeus
+ *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
+ */
+
 package org.openapitools.model;
 
 import io.swagger.annotations.ApiModel;
@@ -16,16 +22,33 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 @JsonTypeName("TypeHolderDefault")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen")
 public class TypeHolderDefault  implements Serializable {
+  
+  
   private @Valid String stringItem = "what";
+
+  
   private @Valid BigDecimal numberItem;
+
+  
   private @Valid Integer integerItem;
+
+  
   private @Valid Boolean boolItem = true;
+
+  
   private @Valid List<Integer> arrayItem = new ArrayList<>();
+
+  
 
   protected TypeHolderDefault(TypeHolderDefaultBuilder<?, ?> b) {
     this.stringItem = b.stringItem;
@@ -45,6 +68,7 @@ public class TypeHolderDefault  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("string_item")
@@ -66,6 +90,7 @@ public class TypeHolderDefault  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("number_item")
   @NotNull
@@ -85,6 +110,7 @@ public class TypeHolderDefault  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("integer_item")
@@ -106,6 +132,7 @@ public class TypeHolderDefault  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("bool_item")
   @NotNull
@@ -125,6 +152,7 @@ public class TypeHolderDefault  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("array_item")
@@ -250,5 +278,19 @@ public class TypeHolderDefault  implements Serializable {
       return self();
     }
   }
+
+  
+  private Map<String, Object> unknown = new HashMap<>();
+
+  @JsonAnyGetter
+  public Map<String, Object> getUnknown() {
+    return unknown;
+  }
+
+  @JsonAnySetter
+  public void addUnknown(String key, Object value) {
+    unknown.put(key, value);
+  }
+  
 }
 

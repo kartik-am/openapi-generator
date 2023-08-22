@@ -1,3 +1,9 @@
+/*
+ * Generation info:
+ *   - generator version: 6.6.1-amadeus
+ *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
+ */
+
 package org.openapitools.model;
 
 import io.swagger.annotations.ApiModel;
@@ -13,6 +19,11 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Model for testing model with \&quot;_class\&quot; property
  **/
@@ -20,7 +31,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonTypeName("ClassModel")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen")
 public class ClassModel  implements Serializable {
+  
+  
   private @Valid String propertyClass;
+
+  
 
   protected ClassModel(ClassModelBuilder<?, ?> b) {
     this.propertyClass = b.propertyClass;
@@ -36,6 +51,7 @@ public class ClassModel  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("_class")
@@ -116,5 +132,19 @@ public class ClassModel  implements Serializable {
       return self();
     }
   }
+
+  
+  private Map<String, Object> unknown = new HashMap<>();
+
+  @JsonAnyGetter
+  public Map<String, Object> getUnknown() {
+    return unknown;
+  }
+
+  @JsonAnySetter
+  public void addUnknown(String key, Object value) {
+    unknown.put(key, value);
+  }
+  
 }
 

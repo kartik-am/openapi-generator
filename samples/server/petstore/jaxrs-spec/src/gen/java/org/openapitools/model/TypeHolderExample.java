@@ -1,3 +1,9 @@
+/*
+ * Generation info:
+ *   - generator version: 6.6.1-amadeus
+ *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
+ */
+
 package org.openapitools.model;
 
 import io.swagger.annotations.ApiModel;
@@ -16,17 +22,36 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 @JsonTypeName("TypeHolderExample")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen")
 public class TypeHolderExample  implements Serializable {
+  
+  
   private @Valid String stringItem;
+
+  
   private @Valid BigDecimal numberItem;
+
+  
   private @Valid Float floatItem;
+
+  
   private @Valid Integer integerItem;
+
+  
   private @Valid Boolean boolItem;
+
+  
   private @Valid List<Integer> arrayItem = new ArrayList<>();
+
+  
 
   protected TypeHolderExample(TypeHolderExampleBuilder<?, ?> b) {
     this.stringItem = b.stringItem;
@@ -48,6 +73,7 @@ public class TypeHolderExample  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "what", required = true, value = "")
   @JsonProperty("string_item")
   @NotNull
@@ -67,6 +93,7 @@ public class TypeHolderExample  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(example = "1.234", required = true, value = "")
   @JsonProperty("number_item")
@@ -88,6 +115,7 @@ public class TypeHolderExample  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "1.234", required = true, value = "")
   @JsonProperty("float_item")
   @NotNull
@@ -107,6 +135,7 @@ public class TypeHolderExample  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(example = "-2", required = true, value = "")
   @JsonProperty("integer_item")
@@ -128,6 +157,7 @@ public class TypeHolderExample  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "true", required = true, value = "")
   @JsonProperty("bool_item")
   @NotNull
@@ -147,6 +177,7 @@ public class TypeHolderExample  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(example = "[0, 1, 2, 3]", required = true, value = "")
   @JsonProperty("array_item")
@@ -279,5 +310,19 @@ public class TypeHolderExample  implements Serializable {
       return self();
     }
   }
+
+  
+  private Map<String, Object> unknown = new HashMap<>();
+
+  @JsonAnyGetter
+  public Map<String, Object> getUnknown() {
+    return unknown;
+  }
+
+  @JsonAnySetter
+  public void addUnknown(String key, Object value) {
+    unknown.put(key, value);
+  }
+  
 }
 
