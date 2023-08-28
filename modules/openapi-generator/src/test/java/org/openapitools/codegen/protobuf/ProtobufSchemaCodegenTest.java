@@ -110,7 +110,7 @@ public class ProtobufSchemaCodegenTest {
         assertThatThrownBy(() ->
                 generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/allOf.yaml"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessage("At least components 'offerPayload_allOf_offerData_offerSet, travelOfferPayload_allOf_offerData_offerSet' are duplicated with differences. Maybe not listed components are duplicated too.");
+                .hasMessage("Property 'false' has different types (string, boolean) in schemas");
     }
 
     @Test
@@ -174,7 +174,7 @@ public class ProtobufSchemaCodegenTest {
         assertThatThrownBy(() ->
                 generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/conflictPropertiesNumber.yaml"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessage("At least components 'offerPayload_allOf_offerData_offerSet, travelOfferPayload_allOf_offerData_offerSet' are duplicated with differences. Maybe not listed components are duplicated too.");
+                .hasMessage("Property 'false' has different types (string, boolean) in schemas");
     }
 
     @Test
@@ -188,7 +188,7 @@ public class ProtobufSchemaCodegenTest {
         assertThatThrownBy(() ->
                 generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/conflictPropertiesType.yaml"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessage("At least components 'offerPayload_allOf_offerData_offerSet, travelOfferPayload_allOf_offerData_offerSet' are duplicated with differences. Maybe not listed components are duplicated too.");
+                .hasMessage("Property 'id' has different types (string, integer) in schemas");
     }
 
     @Test

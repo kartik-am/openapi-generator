@@ -57,7 +57,6 @@ import org.openapitools.codegen.utils.ImplementationVersion;
 import org.openapitools.codegen.utils.ModelUtils;
 import org.openapitools.codegen.utils.ProcessUtils;
 import org.openapitools.codegen.utils.URLPathUtils;
-import static org.openapitools.codegen.utils.StringUtils.underscore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,6 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -299,41 +297,40 @@ public class DefaultGenerator implements Generator {
         }
     }
 
-    private void checkSchemas(Map<String, Schema> schemas) {
+    private void checkSchemas(Map<String, Schema> schemas) throws RuntimeException {
         for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
             Set<String> duplicateSchemas = findDuplicates(schema, schemas);
-            if (duplicateSchemas != null && !duplicateSchemas.isEmpty() && isConflictingProperties(duplicateSchemas, schemas)) {
-                LOGGER.error("At least components '" + StringUtils.join(duplicateSchemas, ", ") + "' are duplicated with differences. Maybe not listed components are duplicated too.");
-                throw new RuntimeException("At least components '" + StringUtils.join(duplicateSchemas, ", ") + "' are duplicated with differences. Maybe not listed components are duplicated too.");
+            if (duplicateSchemas != null && !duplicateSchemas.isEmpty()) {
+                mergeProperties(duplicateSchemas, schemas);
             }
         }
     }
 
-    private boolean isConflictingProperties(Set<String> duplicateSchemas, Map<String, Schema> schemas) {
-        StringBuilder reference = new StringBuilder();
+    private void mergeProperties(Set<String> duplicateSchemas, Map<String, Schema> schemas) throws RuntimeException {
+        Map<String, Schema> properties = new HashMap<>();
         for (String schemaName : duplicateSchemas) {
             Schema schema = schemas.get(schemaName);
 
-            Map<String, Schema> properties = schema.getProperties();
+            Map<String, Schema> props = schema.getProperties();
 
-            if (reference.length() == 0) {
-                for (Map.Entry<String, Schema> property : properties.entrySet()) {
-                    reference.append(property.getKey()).append(property.getValue().getType());
+            for (Map.Entry<String, Schema> property : props.entrySet()) {
+                if (!properties.containsKey(property.getKey())) {
+                    properties.put(property.getKey(), property.getValue());
+                } else if (!properties.get(property.getKey()).getType().equals(property.getValue().getType())) {
+                    // Property with same name but different type
+                    String msg = "Property \'" + property.getKey() + "\' has different types ("
+                            + properties.get(property.getKey()).getType() + ", "
+                            + property.getValue().getType() + ") in schemas";
+                    LOGGER.error(msg);
+                    throw new RuntimeException(msg);
                 }
-                continue;
-            }
-
-            StringBuilder currentType = new StringBuilder();
-            for (Map.Entry<String, Schema> property : properties.entrySet()) {
-                currentType.append(property.getKey()).append(property.getValue().getType());
-            }
-
-            if (!reference.toString().equals(currentType.toString())) {
-                return true;
             }
         }
 
-        return false;
+        for (String schemaName : duplicateSchemas) {
+            Schema schema = schemas.get(schemaName);
+            schema.setProperties(properties);
+        }
     }
 
     private Set findDuplicates(Map.Entry<String, Schema> refSchema, Map<String, Schema> schemas) {
