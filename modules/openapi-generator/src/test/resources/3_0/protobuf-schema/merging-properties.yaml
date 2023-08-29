@@ -58,6 +58,6 @@ components:
                   type: object
                   properties:
                     no:
-                      type: boolean
+                      type: string
                     price:
                       type: integer

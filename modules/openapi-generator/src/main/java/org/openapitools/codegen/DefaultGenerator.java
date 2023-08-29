@@ -316,13 +316,16 @@ public class DefaultGenerator implements Generator {
             for (Map.Entry<String, Schema> property : props.entrySet()) {
                 if (!properties.containsKey(property.getKey())) {
                     properties.put(property.getKey(), property.getValue());
-                } else if (!properties.get(property.getKey()).getType().equals(property.getValue().getType())) {
-                    // Property with same name but different type
-                    String msg = "Property \'" + property.getKey() + "\' has different types ("
-                            + properties.get(property.getKey()).getType() + ", "
-                            + property.getValue().getType() + ") in schemas";
-                    LOGGER.error(msg);
-                    throw new RuntimeException(msg);
+                } else if (!Schema.class.equals(properties.get(property.getKey()).getClass())
+                    && !Schema.class.equals(property.getValue().getClass())) {
+                    if (!properties.get(property.getKey()).getType().equals(property.getValue().getType())) {
+                        // Property with same name but different type
+                        String msg = "Property \'" + property.getKey() + "\' has different types ("
+                                + properties.get(property.getKey()).getType() + ", "
+                                + property.getValue().getType() + ") in schemas";
+                        LOGGER.error(msg);
+                        throw new RuntimeException(msg);
+                    }
                 }
             }
         }

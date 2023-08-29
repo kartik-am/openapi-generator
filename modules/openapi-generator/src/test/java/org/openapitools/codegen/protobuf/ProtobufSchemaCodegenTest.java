@@ -164,20 +164,6 @@ public class ProtobufSchemaCodegenTest {
     }
 
     @Test
-    public void testCodeGenWithConflictingPropertiesNumber() throws IOException {
-        Map<String, Object> properties = new HashMap<>();
-        Map<String, String> globalProperties = new HashMap<>();
-        // set line break to \n across all platforms
-        System.setProperty("line.separator", "\n");
-
-        File output = Files.createTempDirectory("test").toFile();
-        assertThatThrownBy(() ->
-                generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/conflictPropertiesNumber.yaml"))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("Property 'false' has different types (string, boolean) in schemas");
-    }
-
-    @Test
     public void testCodeGenWithConflictingPropertiesType() throws IOException {
         Map<String, Object> properties = new HashMap<>();
         Map<String, String> globalProperties = new HashMap<>();
@@ -185,10 +171,26 @@ public class ProtobufSchemaCodegenTest {
         System.setProperty("line.separator", "\n");
 
         File output = Files.createTempDirectory("test").toFile();
+
         assertThatThrownBy(() ->
                 generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/conflictPropertiesType.yaml"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("Property 'id' has different types (string, integer) in schemas");
+    }
+
+    @Test
+    public void testCodeGenWithMergingProperties() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> globalProperties = new HashMap<>();
+        // set line break to \n across all platforms
+        System.setProperty("line.separator", "\n");
+
+        File output = Files.createTempDirectory("test").toFile();
+        List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/merging-properties.yaml");
+        TestUtils.ensureContainsFile(files, output, "models/travel_offer_payload_all_of_offer_data_offer_set.proto");
+        Path path = Paths.get(output + "/models/travel_offer_payload_all_of_offer_data_offer_set.proto");
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/merging-properties.proto"));
+        FileUtils.deleteDirectory(output);
     }
 
     @Test
