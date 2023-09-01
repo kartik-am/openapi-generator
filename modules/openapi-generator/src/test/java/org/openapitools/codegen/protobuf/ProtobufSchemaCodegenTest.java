@@ -187,9 +187,24 @@ public class ProtobufSchemaCodegenTest {
 
         File output = Files.createTempDirectory("test").toFile();
         List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/merging-properties.yaml");
-        TestUtils.ensureContainsFile(files, output, "models/travel_offer_payload_all_of_offer_data_offer_set.proto");
-        Path path = Paths.get(output + "/models/travel_offer_payload_all_of_offer_data_offer_set.proto");
+        TestUtils.ensureDoesNotContainsFile(files, output, "models/travel_offer_payload_all_of_offer_data_offer_set.proto");
+        Path path = Paths.get(output + "/models/offer_payload_all_of_offer_data_offer_set.proto");
         TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/merging-properties.proto"));
+        FileUtils.deleteDirectory(output);
+    }
+
+    @Test
+    public void testCodeGenDuplicateSchemaNoError() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> globalProperties = new HashMap<>();
+        // set line break to \n across all platforms
+        System.setProperty("line.separator", "\n");
+
+        File output = Files.createTempDirectory("test").toFile();
+        List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/duplicate-schema-no-error.yaml");
+        TestUtils.ensureContainsFile(files, output, "models/object1.proto");
+        Path path = Paths.get(output + "/models/object1.proto");
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/duplicate-schema-no-error.proto"));
         FileUtils.deleteDirectory(output);
     }
 

@@ -16,14 +16,17 @@ syntax = "proto3";
 
 package openapitools;
 
+import "models/object1_all_of_offer_data.proto";
 
-message OfferPayloadAllOfOfferDataOfferSet {
+message Object1 {
 
-  int32 price = 106934601;
+  string var01 = 111976296;
 
-  string foo = 101574;
+  string var02 = 111976297;
 
-  string id = 3355;
+  string var03 = 111976298;
+
+  openapitools.Object1AllOfOfferData offerData = 333443113;
 
 
 }

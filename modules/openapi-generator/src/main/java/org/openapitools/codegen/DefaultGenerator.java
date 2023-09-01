@@ -298,12 +298,43 @@ public class DefaultGenerator implements Generator {
     }
 
     private void checkSchemas(Map<String, Schema> schemas) throws RuntimeException {
+        Map<String, Schema> unusedSchemas = new HashMap<>();
+
         for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
             Set<String> duplicateSchemas = findDuplicates(schema, schemas);
             if (duplicateSchemas != null && !duplicateSchemas.isEmpty()) {
                 mergeProperties(duplicateSchemas, schemas);
             }
+
+            for (String schemaName : duplicateSchemas) {
+                unusedSchemas.put(schemaName, schemas.get(schemaName));
+            }
         }
+
+        Map<String, Schema> schemasToDelete = deleteUnusedSchemas(schemas, unusedSchemas);
+
+        for (String schema : schemasToDelete.keySet()) {
+            schemas.remove(schema);
+        }
+    }
+
+    private Map<String, Schema> deleteUnusedSchemas(Map<String, Schema> schemas, Map<String, Schema> unusedSchemas) {
+        Map<String, Schema> schemasToDelete = new HashMap<>(unusedSchemas);
+
+        for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
+            Map<String, Schema> props = schema.getValue().getProperties();
+            if (props != null) {
+                for (Map.Entry<String, Schema> prop : props.entrySet()) {
+                    if (Schema.class.equals(prop.getValue().getClass())) {
+                        String ref = prop.getValue().get$ref();
+                        String schemaFullName = ref.substring(ref.lastIndexOf("/") + 1);
+                        schemasToDelete.remove(schemaFullName);
+                    }
+                }
+            }
+        }
+
+        return schemasToDelete;
     }
 
     private void mergeProperties(Set<String> duplicateSchemas, Map<String, Schema> schemas) throws RuntimeException {
