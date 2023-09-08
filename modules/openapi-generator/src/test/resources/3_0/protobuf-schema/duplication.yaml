@@ -1,0 +1,34 @@
+openapi: 3.0.0
+info:
+  description: This specification is used as a demonstration for allOf
+  version: 1.0.0
+  title: AllOf duplication
+paths:
+  /dummy:
+    get:
+      summary: A dummy endpoint to make the spec valid.
+      responses:
+        '200':
+          description: Success
+components:
+  schemas:
+    Category:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+        name:
+          type: "integer"
+    CategoryExtended:
+      type: "object"
+      properties:
+        categoryBase:
+          $ref: "#/components/schemas/Category"
+        extension:
+          type: "object"
+          properties:
+            color:
+              type: "string"
+            name:
+              type: "string"

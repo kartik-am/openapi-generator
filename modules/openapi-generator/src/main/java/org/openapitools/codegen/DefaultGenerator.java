@@ -329,72 +329,54 @@ public class DefaultGenerator implements Generator {
         }
     }
 
-    /*private void flattenAllOfSchemaRef(Map<String, Schema> schemas)  throws RuntimeException {
-        <String, Schema> flatSchemas = new HashMap<>();
+    private void manageRef(Map<String, Schema> schemas, Schema refSchema) {
+        Map<String, Schema> properties = new HashMap<>();
+        if (refSchema.getProperties() != null) {
+            properties.putAll(refSchema.getProperties());
+        }
 
-        for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
-            if (schema.getValue().getAllOf() != null) {
-                for (Object allOfSchema : schema.getValue().getAllOf()) {
-                    String $ref = ((Schema) allOfSchema).get$ref();
-                    if ($ref != null) {
-                        if (schema.getValue().getProperties() == null) {
-                            schema.getValue().setProperties(new HashMap<String, Schema>());
-                        }
-                        Map<String, Schema> properties = manageRef(schemas, $ref);
-                        for (Map.Entry<String, Schema> property : properties.entrySet()) {
-                            if (!schema.getValue().getProperties().containsKey(property.getKey())) {
-                                schema.getValue().addProperty(property.getKey(), property.getValue());
-                            } else {
-                                if (!((Schema) schema.getValue().getProperties().get(property.getKey())).getType().equals(property.getValue().getType())) {
-                                    String msg = "Property \'" + property.getKey() + "\' has different types ("
-                                            + ((Schema) schema.getValue().getProperties().get(property.getKey())).getType() + ", "
-                                            + property.getValue().getType() + ") in schemas";
-                                    LOGGER.error(msg);
-                                    throw new RuntimeException(msg);
-                                }
-                            }
-                        }
-                    }
-                    ((Schema) allOfSchema).set$ref(null);
+        String $ref;
+        if (refSchema.getAllOf() != null) {
+            for (Object allOfSchema : refSchema.getAllOf()) {
+                $ref = ((Schema) allOfSchema).get$ref();
+                properties = flatProperties(schemas, $ref, properties);
+            }
+        } else if (refSchema.get$ref() != null) {
+            $ref = refSchema.get$ref();
+            properties = flatProperties(schemas, $ref, properties);
+        } else {
+            Map<String, Schema> props = refSchema.getProperties();
+            if (props != null) {
+                for (Map.Entry<String, Schema> property : props.entrySet()) {
+                    $ref = property.getValue().get$ref();
+                    properties = flatProperties(schemas, $ref, properties);
                 }
             }
-            flatSchemas.put(schema.getKey(), schema.getValue());
         }
-    }*/
+    }
 
-    private Map<String, Schema> manageRef(Map<String, Schema> schemas, Schema refchema) {
-        Schema schema;
-
-        Map<String, Schema> properties = new HashMap<>();
-        if (refchema.getProperties() != null) {
-            properties.putAll(refchema.getProperties());
-        }
-
-        if (refchema.getAllOf() != null) {
-            for (Object allOfSchema : refchema.getAllOf()) {
-                String $ref = ((Schema) allOfSchema).get$ref();
-                if ($ref != null) {
-                    if ($ref.startsWith("#")) {
-                        schema = schemas.get($ref.substring($ref.lastIndexOf("/") + 1));
+    private Map<String, Schema> flatProperties(Map<String, Schema> schemas, String $ref, Map<String, Schema> properties){
+        if ($ref != null) {
+            Schema schema;
+            if ($ref.startsWith("#")) {
+                schema = schemas.get($ref.substring($ref.lastIndexOf("/") + 1));
+            } else {
+                schema = schemas.get($ref.substring($ref.lastIndexOf("/") + 1, $ref.indexOf(".")));
+            }
+            Map<String, Schema> newProps = flatProperties(schemas, schema.get$ref(), schema.getProperties());
+            if (newProps != null) {
+                for (Map.Entry<String, Schema> property : newProps.entrySet()) {
+                    if (!properties.containsKey(property.getKey())) {
+                        properties.put(property.getKey(), property.getValue());
                     } else {
-                        schema = schemas.get($ref.substring($ref.lastIndexOf("/") + 1, $ref.indexOf(".")));
-                    }
-                    Map<String, Schema> newProps = manageRef(schemas, schema);
-                    if (newProps != null) {
-                        for (Map.Entry<String, Schema> property : newProps.entrySet()) {
-                            if (!properties.containsKey(property.getKey())) {
-                                properties.put(property.getKey(), property.getValue());
-                            } else {
-                                if (!properties.get(property.getKey()).getClass().equals(Schema.class) &&
-                                        !property.getValue().getClass().equals(Schema.class) &&
-                                        !properties.get(property.getKey()).getType().equals(property.getValue().getType())) {
-                                    String msg = "Property \'" + property.getKey() + "\' has different types ("
-                                            + properties.get(property.getKey()).getType() + ", "
-                                            + property.getValue().getType() + ") in schemas";
-                                    LOGGER.error(msg);
-                                    throw new RuntimeException(msg);
-                                }
-                            }
+                        if (!properties.get(property.getKey()).getClass().equals(Schema.class) &&
+                                !property.getValue().getClass().equals(Schema.class) &&
+                                !properties.get(property.getKey()).getType().equals(property.getValue().getType())) {
+                            String msg = "Property \'" + property.getKey() + "\' has different types ("
+                                    + properties.get(property.getKey()).getType() + ", "
+                                    + property.getValue().getType() + ") in schemas";
+                            LOGGER.error(msg);
+                            throw new RuntimeException(msg);
                         }
                     }
                 }
