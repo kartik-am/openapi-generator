@@ -84,6 +84,21 @@ public class ProtobufSchemaCodegenTest {
     }
 
     @Test
+    public void testCodeGenWithAllOfDuplication() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> globalProperties = new HashMap<>();
+        // set line break to \n across all platforms
+        System.setProperty("line.separator", "\n");
+
+        File output = Files.createTempDirectory("test").toFile();
+        assertThatThrownBy(() ->
+                generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/allOf-duplication.yaml"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Property 'name' has different types (integer, string) in schemas");
+        output.delete();
+    }
+
+    @Test
     public void testCodeGenWithOneOfSimple() throws IOException {
         Map<String, Object> properties = new HashMap<>();
         Map<String, String> globalProperties = new HashMap<>();
@@ -110,7 +125,7 @@ public class ProtobufSchemaCodegenTest {
         assertThatThrownBy(() ->
                 generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/allOf.yaml"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessage("Property 'false' has different types (string, boolean) in schemas");
+                .hasMessage("Property 'foo' has different types (string, boolean) in schemas");
     }
 
     @Test

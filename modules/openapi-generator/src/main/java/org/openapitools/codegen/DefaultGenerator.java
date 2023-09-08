@@ -300,10 +300,17 @@ public class DefaultGenerator implements Generator {
     private void checkSchemas(Map<String, Schema> schemas) throws RuntimeException {
         Map<String, Schema> unusedSchemas = new HashMap<>();
 
+        //flattenAllOfSchemaRef(schemas);
+
         for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
             Set<String> duplicateSchemas = findDuplicates(schema, schemas);
             if (duplicateSchemas != null && !duplicateSchemas.isEmpty()) {
                 mergeProperties(duplicateSchemas, schemas);
+
+                if (isConflictingProperties(duplicateSchemas, schemas)) {
+                    LOGGER.error("At least components '" + StringUtils.join(duplicateSchemas, ", ") + "' are duplicated with differences. Maybe not listed components are duplicated too.");
+                    throw new RuntimeException("At least components '" + StringUtils.join(duplicateSchemas, ", ") + "' are duplicated with differences. Maybe not listed components are duplicated too.");
+                }
             }
 
             for (String schemaName : duplicateSchemas) {
@@ -316,19 +323,127 @@ public class DefaultGenerator implements Generator {
         for (String schema : schemasToDelete.keySet()) {
             schemas.remove(schema);
         }
+
+        for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
+            manageRef(schemas, schema.getValue());
+        }
+    }
+
+    /*private void flattenAllOfSchemaRef(Map<String, Schema> schemas)  throws RuntimeException {
+        <String, Schema> flatSchemas = new HashMap<>();
+
+        for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
+            if (schema.getValue().getAllOf() != null) {
+                for (Object allOfSchema : schema.getValue().getAllOf()) {
+                    String $ref = ((Schema) allOfSchema).get$ref();
+                    if ($ref != null) {
+                        if (schema.getValue().getProperties() == null) {
+                            schema.getValue().setProperties(new HashMap<String, Schema>());
+                        }
+                        Map<String, Schema> properties = manageRef(schemas, $ref);
+                        for (Map.Entry<String, Schema> property : properties.entrySet()) {
+                            if (!schema.getValue().getProperties().containsKey(property.getKey())) {
+                                schema.getValue().addProperty(property.getKey(), property.getValue());
+                            } else {
+                                if (!((Schema) schema.getValue().getProperties().get(property.getKey())).getType().equals(property.getValue().getType())) {
+                                    String msg = "Property \'" + property.getKey() + "\' has different types ("
+                                            + ((Schema) schema.getValue().getProperties().get(property.getKey())).getType() + ", "
+                                            + property.getValue().getType() + ") in schemas";
+                                    LOGGER.error(msg);
+                                    throw new RuntimeException(msg);
+                                }
+                            }
+                        }
+                    }
+                    ((Schema) allOfSchema).set$ref(null);
+                }
+            }
+            flatSchemas.put(schema.getKey(), schema.getValue());
+        }
+    }*/
+
+    private Map<String, Schema> manageRef(Map<String, Schema> schemas, Schema refchema) {
+        Schema schema;
+
+        Map<String, Schema> properties = new HashMap<>();
+        if (refchema.getProperties() != null) {
+            properties.putAll(refchema.getProperties());
+        }
+
+        if (refchema.getAllOf() != null) {
+            for (Object allOfSchema : refchema.getAllOf()) {
+                String $ref = ((Schema) allOfSchema).get$ref();
+                if ($ref != null) {
+                    if ($ref.startsWith("#")) {
+                        schema = schemas.get($ref.substring($ref.lastIndexOf("/") + 1));
+                    } else {
+                        schema = schemas.get($ref.substring($ref.lastIndexOf("/") + 1, $ref.indexOf(".")));
+                    }
+                    Map<String, Schema> newProps = manageRef(schemas, schema);
+                    if (newProps != null) {
+                        for (Map.Entry<String, Schema> property : newProps.entrySet()) {
+                            if (!properties.containsKey(property.getKey())) {
+                                properties.put(property.getKey(), property.getValue());
+                            } else {
+                                if (!properties.get(property.getKey()).getClass().equals(Schema.class) &&
+                                        !property.getValue().getClass().equals(Schema.class) &&
+                                        !properties.get(property.getKey()).getType().equals(property.getValue().getType())) {
+                                    String msg = "Property \'" + property.getKey() + "\' has different types ("
+                                            + properties.get(property.getKey()).getType() + ", "
+                                            + property.getValue().getType() + ") in schemas";
+                                    LOGGER.error(msg);
+                                    throw new RuntimeException(msg);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return properties;
+    }
+
+    private boolean isConflictingProperties(Set<String> duplicateSchemas, Map<String, Schema> schemas) {
+        StringBuilder reference = new StringBuilder();
+        for (String schemaName : duplicateSchemas) {
+            Schema schema = schemas.get(schemaName);
+
+            Map<String, Schema> properties = schema.getProperties();
+
+            if (reference.length() == 0) {
+                for (Map.Entry<String, Schema> property : properties.entrySet()) {
+                    reference.append(property.getKey()).append(property.getValue().getType());
+                }
+                continue;
+            }
+
+            StringBuilder currentType = new StringBuilder();
+            for (Map.Entry<String, Schema> property : properties.entrySet()) {
+                currentType.append(property.getKey()).append(property.getValue().getType());
+            }
+
+            if (!reference.toString().equals(currentType.toString())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private Map<String, Schema> deleteUnusedSchemas(Map<String, Schema> schemas, Map<String, Schema> unusedSchemas) {
         Map<String, Schema> schemasToDelete = new HashMap<>(unusedSchemas);
 
-        for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
-            Map<String, Schema> props = schema.getValue().getProperties();
-            if (props != null) {
-                for (Map.Entry<String, Schema> prop : props.entrySet()) {
-                    if (Schema.class.equals(prop.getValue().getClass())) {
-                        String ref = prop.getValue().get$ref();
-                        String schemaFullName = ref.substring(ref.lastIndexOf("/") + 1);
-                        schemasToDelete.remove(schemaFullName);
+        if (!unusedSchemas.isEmpty()) {
+            for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
+                Map<String, Schema> props = schema.getValue().getProperties();
+                if (props != null) {
+                    for (Map.Entry<String, Schema> prop : props.entrySet()) {
+                        if (Schema.class.equals(prop.getValue().getClass())) {
+                            String ref = prop.getValue().get$ref();
+                            String schemaFullName = ref.substring(ref.lastIndexOf("/") + 1);
+                            schemasToDelete.remove(schemaFullName);
+                        }
                     }
                 }
             }
