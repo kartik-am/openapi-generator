@@ -355,14 +355,19 @@ public class DefaultGenerator implements Generator {
         }
     }
 
-    private Map<String, Schema> flatProperties(Map<String, Schema> schemas, String $ref, Map<String, Schema> properties){
+    private Map<String, Schema> flatProperties(Map<String, Schema> schemas, String $ref, Map<String, Schema> properties) {
         if ($ref != null) {
+            if (properties == null) {
+                properties = new HashMap<>();
+            }
+
             Schema schema;
             if ($ref.startsWith("#")) {
                 schema = schemas.get($ref.substring($ref.lastIndexOf("/") + 1));
             } else {
                 schema = schemas.get($ref.substring($ref.lastIndexOf("/") + 1, $ref.indexOf(".")));
             }
+
             Map<String, Schema> newProps = flatProperties(schemas, schema.get$ref(), schema.getProperties());
             if (newProps != null) {
                 for (Map.Entry<String, Schema> property : newProps.entrySet()) {

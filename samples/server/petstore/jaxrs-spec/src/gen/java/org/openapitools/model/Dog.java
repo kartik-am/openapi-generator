@@ -1,6 +1,6 @@
 /*
  * Generation info:
- *   - generator version: 6.6.1-amadeus
+ *   - generator version: 6.6.2-amadeus
  *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
  */
 
