@@ -1,0 +1,59 @@
+openapi: 3.0.0
+info:
+  description: conflict with properties number
+  version: 1.0.0
+  title: AllOf
+paths:
+  /dummy:
+    get:
+      summary: A dummy endpoint to make the spec valid.
+      responses:
+        '200':
+          description: Success
+components:
+  schemas:
+    object0:
+      title: object0
+      type: object
+      description: object 0
+      properties:
+        var01:
+          type: string
+        var02:
+          type: string
+        var03:
+          type: string
+    object1:
+      title: object1
+      type: object
+      description: object 1
+      allOf:
+        - $ref: '#/components/schemas/object0'
+        - type: object
+          properties:
+            offerData:
+              type: object
+              properties:
+                var11:
+                  type: string
+                var12:
+                  type: string
+                var13:
+                  type: string
+    object2:
+      title: object2
+      type: object
+      description: object 2
+      allOf:
+        - $ref: '#/components/schemas/object0'
+        - type: object
+          properties:
+            offerData:
+              type: object
+              properties:
+                var11:
+                  type: string
+                var12:
+                  type: string
+                var13:
+                  type: string

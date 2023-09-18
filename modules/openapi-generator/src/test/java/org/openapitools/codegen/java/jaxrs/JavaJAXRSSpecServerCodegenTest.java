@@ -923,8 +923,8 @@ public class JavaJAXRSSpecServerCodegenTest extends JavaJaxrsBaseTest {
         output.deleteOnExit();
 
         final OpenAPI openAPI = new OpenAPIParser()
-                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/enum_base" +
-                        ".yaml", null, new ParseOptions()).getOpenAPI();
+                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/enum_base.yaml",
+                        null, new ParseOptions()).getOpenAPI();
 
         codegen.setOutputDir(output.getAbsolutePath());
 
@@ -951,8 +951,8 @@ public class JavaJAXRSSpecServerCodegenTest extends JavaJaxrsBaseTest {
         output.deleteOnExit();
 
         final OpenAPI openAPI = new OpenAPIParser()
-                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/enum_unknown" +
-                        ".yaml", null, new ParseOptions()).getOpenAPI();
+                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/enum_unknown.yaml",
+                        null, new ParseOptions()).getOpenAPI();
 
         codegen.setOutputDir(output.getAbsolutePath());
         codegen.additionalProperties().put(START_ENUMS_WITH_UNKNOWN, true);
@@ -980,8 +980,8 @@ public class JavaJAXRSSpecServerCodegenTest extends JavaJaxrsBaseTest {
         output.deleteOnExit();
 
         final OpenAPI openAPI = new OpenAPIParser()
-                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/enum_unspecified" +
-                        ".yaml", null, new ParseOptions()).getOpenAPI();
+                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/enum_unspecified.yaml",
+                        null, new ParseOptions()).getOpenAPI();
 
         codegen.setOutputDir(output.getAbsolutePath());
         codegen.additionalProperties().put(START_ENUMS_WITH_UNSPECIFIED, true);
@@ -1001,5 +1001,34 @@ public class JavaJAXRSSpecServerCodegenTest extends JavaJaxrsBaseTest {
         Path path = Paths.get(output + "/src/gen/java/org/openapitools/model/EnumUnspecified.java");
         // Expected JAVA file is suffixed by .test to avoid automatic JAVA refactor done by IDE
         TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/JavaJaxRSSpec/EnumUnspecified.java.test"));
+    }
+
+    @Test
+    public void generateModelWithMergingProperties() throws Exception {
+        final File output = Files.createTempDirectory("test").toFile();
+        output.deleteOnExit();
+
+        final OpenAPI openAPI = new OpenAPIParser()
+                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/merging-properties.yaml",
+                        null, new ParseOptions()).getOpenAPI();
+
+        codegen.setOutputDir(output.getAbsolutePath());
+
+        final ClientOptInput input = new ClientOptInput()
+                .openAPI(openAPI)
+                .config(codegen); //Using JavaJAXRSSpecServerCodegen
+
+        final DefaultGenerator generator = new DefaultGenerator();
+        final List<File> files = generator.opts(input).generate(); //When generating files
+
+        //Then the java files are compilable
+        validateJavaSourceFiles(files);
+
+        //And the generated class contains CompletionStage<Response>
+        TestUtils.ensureDoesNotContainsFile(files, output, "src/gen/java/org/openapitools/model/TravelOfferPayloadAllOfOfferDataOfferSet.java");
+        TestUtils.ensureContainsFile(files, output, "src/gen/java/org/openapitools/model/OfferPayloadAllOfOfferDataOfferSet.java");
+        Path path = Paths.get(output + "/src/gen/java/org/openapitools/model/OfferPayloadAllOfOfferDataOfferSet.java");
+        // Expected JAVA file is suffixed by .test to avoid automatic JAVA refactor done by IDE
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/JavaJaxRSSpec/MergingProperties.java.test"));
     }
 }

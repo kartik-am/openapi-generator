@@ -57,7 +57,6 @@ import org.openapitools.codegen.utils.ImplementationVersion;
 import org.openapitools.codegen.utils.ModelUtils;
 import org.openapitools.codegen.utils.ProcessUtils;
 import org.openapitools.codegen.utils.URLPathUtils;
-import static org.openapitools.codegen.utils.StringUtils.underscore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,6 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -299,14 +297,98 @@ public class DefaultGenerator implements Generator {
         }
     }
 
-    private void checkSchemas(Map<String, Schema> schemas) {
+    private void checkSchemas(Map<String, Schema> schemas) throws RuntimeException {
+        Map<String, Schema> unusedSchemas = new HashMap<>();
+
+        //flattenAllOfSchemaRef(schemas);
+
         for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
             Set<String> duplicateSchemas = findDuplicates(schema, schemas);
-            if (duplicateSchemas != null && !duplicateSchemas.isEmpty() && isConflictingProperties(duplicateSchemas, schemas)) {
-                LOGGER.error("At least components '" + StringUtils.join(duplicateSchemas, ", ") + "' are duplicated with differences. Maybe not listed components are duplicated too.");
-                throw new RuntimeException("At least components '" + StringUtils.join(duplicateSchemas, ", ") + "' are duplicated with differences. Maybe not listed components are duplicated too.");
+            if (duplicateSchemas != null && !duplicateSchemas.isEmpty()) {
+                mergeProperties(duplicateSchemas, schemas);
+
+                if (isConflictingProperties(duplicateSchemas, schemas)) {
+                    LOGGER.error("At least components '" + StringUtils.join(duplicateSchemas, ", ") + "' are duplicated with differences. Maybe not listed components are duplicated too.");
+                    throw new RuntimeException("At least components '" + StringUtils.join(duplicateSchemas, ", ") + "' are duplicated with differences. Maybe not listed components are duplicated too.");
+                }
+            }
+
+            for (String schemaName : duplicateSchemas) {
+                unusedSchemas.put(schemaName, schemas.get(schemaName));
             }
         }
+
+        Map<String, Schema> schemasToDelete = deleteUnusedSchemas(schemas, unusedSchemas);
+
+        for (String schema : schemasToDelete.keySet()) {
+            schemas.remove(schema);
+        }
+
+        for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
+            manageRef(schemas, schema.getValue());
+        }
+    }
+
+    private void manageRef(Map<String, Schema> schemas, Schema refSchema) {
+        Map<String, Schema> properties = new HashMap<>();
+        if (refSchema.getProperties() != null) {
+            properties.putAll(refSchema.getProperties());
+        }
+
+        String $ref;
+        if (refSchema.getAllOf() != null) {
+            for (Object allOfSchema : refSchema.getAllOf()) {
+                $ref = ((Schema) allOfSchema).get$ref();
+                properties = flatProperties(schemas, $ref, properties);
+            }
+        } else if (refSchema.get$ref() != null) {
+            $ref = refSchema.get$ref();
+            properties = flatProperties(schemas, $ref, properties);
+        } else {
+            Map<String, Schema> props = refSchema.getProperties();
+            if (props != null) {
+                for (Map.Entry<String, Schema> property : props.entrySet()) {
+                    $ref = property.getValue().get$ref();
+                    properties = flatProperties(schemas, $ref, properties);
+                }
+            }
+        }
+    }
+
+    private Map<String, Schema> flatProperties(Map<String, Schema> schemas, String $ref, Map<String, Schema> properties) {
+        if ($ref != null) {
+            if (properties == null) {
+                properties = new HashMap<>();
+            }
+
+            Schema schema;
+            if ($ref.startsWith("#")) {
+                schema = schemas.get($ref.substring($ref.lastIndexOf("/") + 1));
+            } else {
+                schema = schemas.get($ref.substring($ref.lastIndexOf("/") + 1, $ref.indexOf(".")));
+            }
+
+            Map<String, Schema> newProps = flatProperties(schemas, schema.get$ref(), schema.getProperties());
+            if (newProps != null) {
+                for (Map.Entry<String, Schema> property : newProps.entrySet()) {
+                    if (!properties.containsKey(property.getKey())) {
+                        properties.put(property.getKey(), property.getValue());
+                    } else {
+                        if (!properties.get(property.getKey()).getClass().equals(Schema.class) &&
+                                !property.getValue().getClass().equals(Schema.class) &&
+                                !properties.get(property.getKey()).getType().equals(property.getValue().getType())) {
+                            String msg = "Property \'" + property.getKey() + "\' has different types ("
+                                    + properties.get(property.getKey()).getType() + ", "
+                                    + property.getValue().getType() + ") in schemas";
+                            LOGGER.error(msg);
+                            throw new RuntimeException(msg);
+                        }
+                    }
+                }
+            }
+        }
+
+        return properties;
     }
 
     private boolean isConflictingProperties(Set<String> duplicateSchemas, Map<String, Schema> schemas) {
@@ -334,6 +416,57 @@ public class DefaultGenerator implements Generator {
         }
 
         return false;
+    }
+
+    private Map<String, Schema> deleteUnusedSchemas(Map<String, Schema> schemas, Map<String, Schema> unusedSchemas) {
+        Map<String, Schema> schemasToDelete = new HashMap<>(unusedSchemas);
+
+        if (!unusedSchemas.isEmpty()) {
+            for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
+                Map<String, Schema> props = schema.getValue().getProperties();
+                if (props != null) {
+                    for (Map.Entry<String, Schema> prop : props.entrySet()) {
+                        if (Schema.class.equals(prop.getValue().getClass())) {
+                            String ref = prop.getValue().get$ref();
+                            String schemaFullName = ref.substring(ref.lastIndexOf("/") + 1);
+                            schemasToDelete.remove(schemaFullName);
+                        }
+                    }
+                }
+            }
+        }
+
+        return schemasToDelete;
+    }
+
+    private void mergeProperties(Set<String> duplicateSchemas, Map<String, Schema> schemas) throws RuntimeException {
+        Map<String, Schema> properties = new HashMap<>();
+        for (String schemaName : duplicateSchemas) {
+            Schema schema = schemas.get(schemaName);
+
+            Map<String, Schema> props = schema.getProperties();
+
+            for (Map.Entry<String, Schema> property : props.entrySet()) {
+                if (!properties.containsKey(property.getKey())) {
+                    properties.put(property.getKey(), property.getValue());
+                } else if (!Schema.class.equals(properties.get(property.getKey()).getClass())
+                    && !Schema.class.equals(property.getValue().getClass())) {
+                    if (!properties.get(property.getKey()).getType().equals(property.getValue().getType())) {
+                        // Property with same name but different type
+                        String msg = "Property \'" + property.getKey() + "\' has different types ("
+                                + properties.get(property.getKey()).getType() + ", "
+                                + property.getValue().getType() + ") in schemas";
+                        LOGGER.error(msg);
+                        throw new RuntimeException(msg);
+                    }
+                }
+            }
+        }
+
+        for (String schemaName : duplicateSchemas) {
+            Schema schema = schemas.get(schemaName);
+            schema.setProperties(properties);
+        }
     }
 
     private Set findDuplicates(Map.Entry<String, Schema> refSchema, Map<String, Schema> schemas) {

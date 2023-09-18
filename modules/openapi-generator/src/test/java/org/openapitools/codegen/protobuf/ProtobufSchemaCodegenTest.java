@@ -84,6 +84,36 @@ public class ProtobufSchemaCodegenTest {
     }
 
     @Test
+    public void testCodeGenWithAllOfDuplication() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> globalProperties = new HashMap<>();
+        // set line break to \n across all platforms
+        System.setProperty("line.separator", "\n");
+
+        File output = Files.createTempDirectory("test").toFile();
+        assertThatThrownBy(() ->
+                generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/allOf-duplication.yaml"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Property 'name' has different types (integer, string) in schemas");
+        output.delete();
+    }
+
+    @Test
+    public void testCodeGenWithDuplication() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> globalProperties = new HashMap<>();
+        // set line break to \n across all platforms
+        System.setProperty("line.separator", "\n");
+
+        File output = Files.createTempDirectory("test").toFile();
+        assertThatThrownBy(() ->
+                generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/duplication.yaml"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Property 'name' has different types (integer, string) in schemas");
+        output.delete();
+    }
+
+    @Test
     public void testCodeGenWithOneOfSimple() throws IOException {
         Map<String, Object> properties = new HashMap<>();
         Map<String, String> globalProperties = new HashMap<>();
@@ -110,7 +140,7 @@ public class ProtobufSchemaCodegenTest {
         assertThatThrownBy(() ->
                 generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/allOf.yaml"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessage("At least components 'offerPayload_allOf_offerData_offerSet, travelOfferPayload_allOf_offerData_offerSet' are duplicated with differences. Maybe not listed components are duplicated too.");
+                .hasMessage("Property 'foo' has different types (string, boolean) in schemas");
     }
 
     @Test
@@ -164,20 +194,6 @@ public class ProtobufSchemaCodegenTest {
     }
 
     @Test
-    public void testCodeGenWithConflictingPropertiesNumber() throws IOException {
-        Map<String, Object> properties = new HashMap<>();
-        Map<String, String> globalProperties = new HashMap<>();
-        // set line break to \n across all platforms
-        System.setProperty("line.separator", "\n");
-
-        File output = Files.createTempDirectory("test").toFile();
-        assertThatThrownBy(() ->
-                generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/conflictPropertiesNumber.yaml"))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("At least components 'offerPayload_allOf_offerData_offerSet, travelOfferPayload_allOf_offerData_offerSet' are duplicated with differences. Maybe not listed components are duplicated too.");
-    }
-
-    @Test
     public void testCodeGenWithConflictingPropertiesType() throws IOException {
         Map<String, Object> properties = new HashMap<>();
         Map<String, String> globalProperties = new HashMap<>();
@@ -185,10 +201,41 @@ public class ProtobufSchemaCodegenTest {
         System.setProperty("line.separator", "\n");
 
         File output = Files.createTempDirectory("test").toFile();
+
         assertThatThrownBy(() ->
                 generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/conflictPropertiesType.yaml"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessage("At least components 'offerPayload_allOf_offerData_offerSet, travelOfferPayload_allOf_offerData_offerSet' are duplicated with differences. Maybe not listed components are duplicated too.");
+                .hasMessage("Property 'id' has different types (string, integer) in schemas");
+    }
+
+    @Test
+    public void testCodeGenWithMergingProperties() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> globalProperties = new HashMap<>();
+        // set line break to \n across all platforms
+        System.setProperty("line.separator", "\n");
+
+        File output = Files.createTempDirectory("test").toFile();
+        List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/merging-properties.yaml");
+        TestUtils.ensureDoesNotContainsFile(files, output, "models/travel_offer_payload_all_of_offer_data_offer_set.proto");
+        Path path = Paths.get(output + "/models/offer_payload_all_of_offer_data_offer_set.proto");
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/merging-properties.proto"));
+        FileUtils.deleteDirectory(output);
+    }
+
+    @Test
+    public void testCodeGenDuplicateSchemaNoError() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> globalProperties = new HashMap<>();
+        // set line break to \n across all platforms
+        System.setProperty("line.separator", "\n");
+
+        File output = Files.createTempDirectory("test").toFile();
+        List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/duplicate-schema-no-error.yaml");
+        TestUtils.ensureContainsFile(files, output, "models/object1.proto");
+        Path path = Paths.get(output + "/models/object1.proto");
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/duplicate-schema-no-error.proto"));
+        FileUtils.deleteDirectory(output);
     }
 
     @Test
