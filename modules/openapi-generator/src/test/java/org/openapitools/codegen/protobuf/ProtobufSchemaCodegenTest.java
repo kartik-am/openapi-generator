@@ -300,6 +300,19 @@ public class ProtobufSchemaCodegenTest {
     }
 
     @Test
+    void testCodeGenWithEnumWithPrefix() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("enumStructNameAsPrefix", true);
+        Map<String, String> globalProperties = new HashMap<>();
+        File output = Files.createTempDirectory("test").toFile();
+        List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/enum-with-prefix.yaml");
+        TestUtils.ensureContainsFile(files, output, "models/status.proto");
+        Path path = Paths.get(output + "/models/status.proto");
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/enum-with-prefix.proto"));
+        FileUtils.deleteDirectory(output);
+    }
+
+    @Test
     public void testNameSnakeCase() throws IOException {
         Map<String, Object> properties = new HashMap<>();
         properties.put("fieldNamesInSnakeCase", true);
