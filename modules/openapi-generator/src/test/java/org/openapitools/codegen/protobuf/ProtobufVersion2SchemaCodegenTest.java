@@ -72,6 +72,7 @@ public class ProtobufVersion2SchemaCodegenTest {
     @Test
     public void testBasicModel() throws IOException {
         Map<String, Object> properties = new HashMap<>();
+        properties.put("enumStructNameAsPrefix", true);
         File output = Files.createTempDirectory("test").toFile();
         List<File> files = generate(output, properties, "src/test/resources/3_0/petstore.yaml");
         TestUtils.ensureContainsFile(files, output, "models/pet.proto");

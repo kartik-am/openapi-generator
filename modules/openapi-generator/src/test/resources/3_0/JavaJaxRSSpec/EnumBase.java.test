@@ -17,11 +17,11 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum EnumBase {
 
-    ENUM1("ENUM_BASE_ENUM1"),
+    ENUM1("ENUM1"),
 
-    ENUM2("ENUM_BASE_ENUM2"),
+    ENUM2("ENUM2"),
 
-    ENUM3("ENUM_BASE_ENUM3");
+    ENUM3("ENUM3");
 
   private String value;
 

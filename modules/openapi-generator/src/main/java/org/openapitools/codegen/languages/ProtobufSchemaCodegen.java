@@ -993,7 +993,10 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
                         throw new RuntimeException("Exception when assigning an index to a protobuf enum field");
                     }
                 }
-                addEnumValuesPrefix(var.allowableValues, var.getEnumName(), var.dataType);
+
+                if (this.enumStructNameAsPrefix) {
+                    addEnumValuesPrefix(var.allowableValues, var.getEnumName(), var.dataType);
+                }
             }
         }
     }
