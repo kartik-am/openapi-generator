@@ -946,6 +946,35 @@ public class JavaJAXRSSpecServerCodegenTest extends JavaJaxrsBaseTest {
     }
 
     @Test
+    public void generateModelWithEnumBaseWithPrefix() throws Exception {
+        final File output = Files.createTempDirectory("test").toFile();
+        output.deleteOnExit();
+
+        final OpenAPI openAPI = new OpenAPIParser()
+                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/enum_base_with_prefix.yaml",
+                        null, new ParseOptions()).getOpenAPI();
+
+        codegen.setOutputDir(output.getAbsolutePath());
+        codegen.additionalProperties().put(ENUM_STRUCT_NAME_AS_PREFIX, true);
+
+        final ClientOptInput input = new ClientOptInput()
+                .openAPI(openAPI)
+                .config(codegen); //Using JavaJAXRSSpecServerCodegen
+
+        final DefaultGenerator generator = new DefaultGenerator();
+        final List<File> files = generator.opts(input).generate(); //When generating files
+
+        //Then the java files are compilable
+        validateJavaSourceFiles(files);
+
+        //And the generated class contains CompletionStage<Response>
+        TestUtils.ensureContainsFile(files, output, "src/gen/java/org/openapitools/model/EnumBaseWithPrefix.java");
+        Path path = Paths.get(output + "/src/gen/java/org/openapitools/model/EnumBaseWithPrefix.java");
+        // Expected JAVA file is suffixed by .test to avoid automatic JAVA refactor done by IDE
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/JavaJaxRSSpec/EnumBaseWithPrefix.java.test"));
+    }
+
+    @Test
     public void generateModelWithEnumUnknown() throws Exception {
         final File output = Files.createTempDirectory("test").toFile();
         output.deleteOnExit();

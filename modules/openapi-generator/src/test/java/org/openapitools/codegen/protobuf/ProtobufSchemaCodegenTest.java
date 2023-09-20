@@ -175,6 +175,7 @@ public class ProtobufSchemaCodegenTest {
         System.setProperty("line.separator", "\n");
 
         properties.put("checkPropertiesDuplication", true);
+        properties.put("enumStructNameAsPrefix", true);
 
         File output = Files.createTempDirectory("test").toFile();
         List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/conflictPropertiesNameWithInheritance.yaml");
@@ -540,6 +541,7 @@ public class ProtobufSchemaCodegenTest {
     public void testExtensionAmaEnum() throws IOException {
         Map<String, Object> properties = new HashMap<>();
         Map<String, String> globalProperties = new HashMap<>();
+        properties.put("enumStructNameAsPrefix", true);
         File output = Files.createTempDirectory("test").toFile();
         List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/extension-ama-enum.yaml");
         TestUtils.ensureContainsFile(files, output, "models/pet.proto");
@@ -552,6 +554,7 @@ public class ProtobufSchemaCodegenTest {
     public void testExtensionAmaEnumNonMatchingItem() throws IOException {
         Map<String, Object> properties = new HashMap<>();
         Map<String, String> globalProperties = new HashMap<>();
+        properties.put("enumStructNameAsPrefix", true);
         File output = Files.createTempDirectory("test").toFile();
         List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/extension-ama-enum-non-matching-item.yaml");
         TestUtils.ensureContainsFile(files, output, "models/pet.proto");

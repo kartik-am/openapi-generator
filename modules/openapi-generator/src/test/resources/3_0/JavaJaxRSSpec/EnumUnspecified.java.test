@@ -17,13 +17,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum EnumUnspecified {
 
-    UNSPECIFIED("ENUM_UNSPECIFIED_UNSPECIFIED"),
+    UNSPECIFIED("UNSPECIFIED"),
 
-    ENUM1("ENUM_UNSPECIFIED_ENUM1"),
+    ENUM1("ENUM1"),
 
-    ENUM2("ENUM_UNSPECIFIED_ENUM2"),
+    ENUM2("ENUM2"),
 
-    ENUM3("ENUM_UNSPECIFIED_ENUM3");
+    ENUM3("ENUM3");
 
   private String value;
 

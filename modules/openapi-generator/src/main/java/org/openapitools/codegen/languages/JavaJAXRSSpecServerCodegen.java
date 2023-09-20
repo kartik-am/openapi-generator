@@ -51,6 +51,7 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
     public static final String KUMULUZEE_LIBRARY = "kumuluzee";
     public static final String START_ENUMS_WITH_UNKNOWN = "startEnumsWithUnknown";
     public static final String START_ENUMS_WITH_UNSPECIFIED = "startEnumsWithUnspecified";
+    public static final String ENUM_STRUCT_NAME_AS_PREFIX = "startStructNameAsPrefix";
 
     private boolean interfaceOnly = false;
     private boolean returnResponse = false;
@@ -66,6 +67,8 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
     private boolean startEnumsWithUnknown = false;
 
     private boolean startEnumsWithUnspecified = false;
+
+    private boolean enumStructNameAsPrefix = false;
 
     public JavaJAXRSSpecServerCodegen() {
         super();
@@ -127,6 +130,7 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
         cliOptions.add(CliOption.newBoolean(SUPPORT_ASYNC, "Wrap responses in CompletionStage type, allowing asynchronous computation (requires JAX-RS 2.1).", supportAsync));
         cliOptions.add(CliOption.newBoolean(START_ENUMS_WITH_UNKNOWN, "Introduces \"UNKNOWN\" as the first element of enumerations.", startEnumsWithUnknown));
         cliOptions.add(CliOption.newBoolean(START_ENUMS_WITH_UNSPECIFIED, "Introduces \"UNSPECIFIED\" as the first element of enumerations.", startEnumsWithUnspecified));
+        cliOptions.add(CliOption.newBoolean(ENUM_STRUCT_NAME_AS_PREFIX, "Uses enum structure name as prefix for the enum values.", startEnumsWithUnspecified));
     }
 
     @Override
@@ -281,6 +285,10 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
         if (additionalProperties.containsKey(this.START_ENUMS_WITH_UNSPECIFIED)) {
             this.startEnumsWithUnspecified = convertPropertyToBooleanAndWriteBack(START_ENUMS_WITH_UNSPECIFIED);
         }
+
+        if (additionalProperties.containsKey(this.ENUM_STRUCT_NAME_AS_PREFIX)) {
+            this.enumStructNameAsPrefix = convertPropertyToBooleanAndWriteBack(ENUM_STRUCT_NAME_AS_PREFIX);
+        }
     }
 
     @Override
@@ -334,10 +342,12 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
         if(allowableValues.containsKey("enumVars")) {
             List<Map<String, Object>> enumVars = (List<Map<String, Object>>)allowableValues.get("enumVars");
 
-            for(Map<String, Object> value : enumVars) {
-                String name = (String)value.get("name");
-                value.put("name", toEnumVarName(prefix + "_" + name, dataType));
-                value.put("value", toEnumValue (prefix + "_" + name, dataType));
+            if (this.enumStructNameAsPrefix) {
+                for (Map<String, Object> value : enumVars) {
+                    String name = (String) value.get("name");
+                    value.put("name", toEnumVarName(prefix + "_" + name, dataType));
+                    value.put("value", toEnumValue(prefix + "_" + name, dataType));
+                }
             }
         }
 
@@ -346,8 +356,11 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
             List<String> values = (List<String>)allowableValues.get("values");
             for(int i = 0 ; i < values.size() ; i++) {
                 if (!values.get(i).startsWith(prefix + "_")) {
-                    // replace value by value with prefix
-                    values.set(i, underscore(prefix + "_" + values.get(i)).toUpperCase(Locale.ROOT));
+                    if (this.enumStructNameAsPrefix) {
+                        // replace value by value with prefix
+                        values.set(i, underscore(prefix + "_" + values.get(i)));
+                    }
+                    values.set(i, values.get(i).toUpperCase(Locale.ROOT));
                 }
             }
         }
@@ -407,7 +420,15 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
                 addUnknownToAllowableValues(allowableValues);
                 addEnumValuesPrefix(allowableValues, model.getClassname(), model.dataType);
             }
+
+            model.getVars().stream()
+                    .filter(property -> property.isEnum)
+                    .forEach(property -> {
+                            addUnknownToAllowableValues(property.allowableValues);
+                            addEnumValuesPrefix(property.allowableValues, model.getClassname(), model.dataType);
+                    });
         }
+
         return super.postProcessModels(objs);
     }
 }
