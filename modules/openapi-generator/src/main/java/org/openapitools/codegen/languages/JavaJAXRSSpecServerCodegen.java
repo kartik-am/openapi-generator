@@ -51,7 +51,7 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
     public static final String KUMULUZEE_LIBRARY = "kumuluzee";
     public static final String START_ENUMS_WITH_UNKNOWN = "startEnumsWithUnknown";
     public static final String START_ENUMS_WITH_UNSPECIFIED = "startEnumsWithUnspecified";
-    public static final String ENUM_STRUCT_NAME_AS_PREFIX = "startStructNameAsPrefix";
+    public static final String ENUM_STRUCT_NAME_AS_PREFIX = "enumStructNameAsPrefix";
 
     private boolean interfaceOnly = false;
     private boolean returnResponse = false;
