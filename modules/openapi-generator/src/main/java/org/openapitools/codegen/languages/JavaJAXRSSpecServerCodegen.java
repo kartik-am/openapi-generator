@@ -425,7 +425,7 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
                     .filter(property -> property.isEnum)
                     .forEach(property -> {
                             addUnknownToAllowableValues(property.allowableValues);
-                            addEnumValuesPrefix(property.allowableValues, model.getClassname(), model.dataType);
+                            addEnumValuesPrefix(property.allowableValues, property.baseName, property.baseType);
                     });
         }
 
