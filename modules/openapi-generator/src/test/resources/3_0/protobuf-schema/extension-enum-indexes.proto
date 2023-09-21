@@ -22,9 +22,9 @@ message Pet {
   int32 id = 3355;
 
   enum Status {
-    STATUS_AVAILABLE = 0;
-    STATUS_PENDING = 2;
-    STATUS_SOLD = 3;
+    AVAILABLE = 0;
+    PENDING = 2;
+    SOLD = 3;
   }
 
   Status status = 355610639;

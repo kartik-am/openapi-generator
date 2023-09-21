@@ -73,6 +73,8 @@ These options may be applied as additional-properties (cli) or configOptions (pl
 |sortModelPropertiesByRequiredFlag|Sort model properties to place required parameters before optional parameters.| |true|
 |sortParamsByRequiredFlag|Sort method arguments to place required parameters before optional parameters.| |true|
 |sourceFolder|source folder for generated code| |src/gen/java|
+|startEnumsWithUnknown|Introduces &quot;UNKNOWN&quot; as the first element of enumerations.| |false|
+|startEnumsWithUnspecified|Introduces &quot;UNSPECIFIED&quot; as the first element of enumerations.| |false|
 |supportAsync|Wrap responses in CompletionStage type, allowing asynchronous computation (requires JAX-RS 2.1).| |false|
 |testOutput|Set output folder for models and APIs tests| |${project.build.directory}/generated-test-sources/openapi|
 |title|a title describing the application| |OpenAPI Server|
@@ -82,6 +84,7 @@ These options may be applied as additional-properties (cli) or configOptions (pl
 |useOneOfInterfaces|whether to use a java interface to describe a set of oneOf options, where each option is a class that implements the interface| |false|
 |useSwaggerAnnotations|Whether to generate Swagger annotations.| |true|
 |useTags|use tags for creating interface and controller classnames| |false|
+|useUnknownFieldsRetention|Whether to generate unknown fields retention for models.| |false|
 |withXml|whether to include support for application/xml content type and include XML annotations in the model (works with libraries that provide support for JSON and XML)| |false|
 
 ## SUPPORTED VENDOR EXTENSIONS

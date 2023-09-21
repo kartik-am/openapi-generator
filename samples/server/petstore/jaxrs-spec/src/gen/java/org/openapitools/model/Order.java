@@ -1,3 +1,9 @@
+/*
+ * Generation info:
+ *   - generator version: 6.6.2-amadeus
+ *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
+ */
+
 package org.openapitools.model;
 
 import io.swagger.annotations.ApiModel;
@@ -14,16 +20,31 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 @JsonTypeName("Order")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen")
 public class Order  implements Serializable {
+  
+  
   private @Valid Long id;
+
+  
   private @Valid Long petId;
+
+  
   private @Valid Integer quantity;
+
+  
   private @Valid Date shipDate;
-  public enum StatusEnum {
+
+
+public enum StatusEnum {
 
     PLACED(String.valueOf("placed")), APPROVED(String.valueOf("approved")), DELIVERED(String.valueOf("delivered"));
 
@@ -70,8 +91,13 @@ public class Order  implements Serializable {
     }
 }
 
+  
   private @Valid StatusEnum status;
+
+  
   private @Valid Boolean complete = false;
+
+  
 
   protected Order(OrderBuilder<?, ?> b) {
     this.id = b.id;
@@ -93,6 +119,7 @@ public class Order  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("id")
   public Long getId() {
@@ -111,6 +138,7 @@ public class Order  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("petId")
@@ -131,6 +159,7 @@ public class Order  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("quantity")
   public Integer getQuantity() {
@@ -149,6 +178,7 @@ public class Order  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("shipDate")
@@ -170,6 +200,7 @@ public class Order  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "Order Status")
   @JsonProperty("status")
   public StatusEnum getStatus() {
@@ -188,6 +219,7 @@ public class Order  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("complete")
@@ -303,5 +335,19 @@ public class Order  implements Serializable {
       return self();
     }
   }
+
+  
+  private Map<String, Object> unknown = new HashMap<>();
+
+  @JsonAnyGetter
+  public Map<String, Object> getUnknown() {
+    return unknown;
+  }
+
+  @JsonAnySetter
+  public void addUnknown(String key, Object value) {
+    unknown.put(key, value);
+  }
+  
 }
 

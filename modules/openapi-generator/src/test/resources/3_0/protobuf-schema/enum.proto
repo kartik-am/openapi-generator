@@ -18,8 +18,8 @@ package openapitools;
 
 
 enum Status {
-  STATUS_UNSPECIFIED = 0;
-  STATUS_PLACED = 1;
-  STATUS_APPROVED = 2;
-  STATUS_DELIVERED = 3;
+  UNSPECIFIED = 0;
+  PLACED = 1;
+  APPROVED = 2;
+  DELIVERED = 3;
 }

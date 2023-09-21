@@ -6,7 +6,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-
+{{#useUnknownFieldsRetention}}{{^additionalProperties}}
+{{#jackson}}
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+{{/jackson}}
+import java.util.HashMap;
+import java.util.Map;
+{{/additionalProperties}}{{/useUnknownFieldsRetention}}
 {{#discriminator}}{{>typeInfoAnnotation}}{{/discriminator}}{{#description}}/**
  * {{.}}
  **/{{/description}}
@@ -197,4 +204,18 @@ public class {{classname}} {{#parent}}extends {{{.}}}{{/parent}} {{#vendorExtens
     }
     {{/vars}}
   }{{/additionalProperties}}{{/generateBuilders}}
+
+  {{#useUnknownFieldsRetention}}{{^additionalProperties}}
+  private Map<String, Object> unknown = new HashMap<>();
+
+  @JsonAnyGetter
+  public Map<String, Object> getUnknown() {
+    return unknown;
+  }
+
+  @JsonAnySetter
+  public void addUnknown(String key, Object value) {
+    unknown.put(key, value);
+  }
+  {{/additionalProperties}}{{/useUnknownFieldsRetention}}
 }

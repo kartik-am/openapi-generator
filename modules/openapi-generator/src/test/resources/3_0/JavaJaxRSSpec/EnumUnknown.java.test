@@ -17,13 +17,13 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum EnumUnknown {
 
-    UNKNOWN("ENUM_UNKNOWN_UNKNOWN"),
+    UNKNOWN("UNKNOWN"),
 
-    ENUM1("ENUM_UNKNOWN_ENUM1"),
+    ENUM1("ENUM1"),
 
-    ENUM2("ENUM_UNKNOWN_ENUM2"),
+    ENUM2("ENUM2"),
 
-    ENUM3("ENUM_UNKNOWN_ENUM3");
+    ENUM3("ENUM3");
 
   private String value;
 

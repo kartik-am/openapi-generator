@@ -1,3 +1,9 @@
+/*
+ * Generation info:
+ *   - generator version: 6.6.2-amadeus
+ *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
+ */
+
 package org.openapitools.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -20,17 +26,34 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 @JsonTypeName("Pet")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen")
 public class Pet  implements Serializable {
+  
+  
   private @Valid Long id;
+
+  
   private @Valid Category category;
+
+  
   private @Valid String name;
+
+  
   private @Valid Set<String> photoUrls = new LinkedHashSet<>();
+
+  
   private @Valid List<Tag> tags;
-  public enum StatusEnum {
+
+
+public enum StatusEnum {
 
     AVAILABLE(String.valueOf("available")), PENDING(String.valueOf("pending")), SOLD(String.valueOf("sold"));
 
@@ -77,7 +100,10 @@ public class Pet  implements Serializable {
     }
 }
 
+  
   private @Valid StatusEnum status;
+
+  
 
   protected Pet(PetBuilder<?, ?> b) {
     this.id = b.id;
@@ -99,6 +125,7 @@ public class Pet  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("id")
   public Long getId() {
@@ -117,6 +144,7 @@ public class Pet  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("category")
@@ -137,6 +165,7 @@ public class Pet  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(example = "doggie", required = true, value = "")
   @JsonProperty("name")
   @NotNull
@@ -156,6 +185,7 @@ public class Pet  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("photoUrls")
@@ -194,6 +224,7 @@ public class Pet  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("tags")
   public List<Tag> getTags() {
@@ -229,6 +260,7 @@ public class Pet  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "pet status in the store")
   @JsonProperty("status")
@@ -344,5 +376,19 @@ public class Pet  implements Serializable {
       return self();
     }
   }
+
+  
+  private Map<String, Object> unknown = new HashMap<>();
+
+  @JsonAnyGetter
+  public Map<String, Object> getUnknown() {
+    return unknown;
+  }
+
+  @JsonAnySetter
+  public void addUnknown(String key, Object value) {
+    unknown.put(key, value);
+  }
+  
 }
 

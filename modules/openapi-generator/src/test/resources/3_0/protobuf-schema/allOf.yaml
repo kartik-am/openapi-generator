@@ -40,7 +40,7 @@ components:
                   properties:
                     id:
                       type: string
-                    no:
+                    foo:
                       type: string
     travelOfferPayload:
       title: Travel Offer Payload
@@ -57,7 +57,7 @@ components:
                 offerSet:
                   type: object
                   properties:
-                    no:
+                    foo:
                       type: boolean
                     price:
                       type: integer

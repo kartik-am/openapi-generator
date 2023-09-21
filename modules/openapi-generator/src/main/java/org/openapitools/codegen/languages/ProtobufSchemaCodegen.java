@@ -60,6 +60,8 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
 
     public static final String START_ENUMS_WITH_UNSPECIFIED = "startEnumsWithUnspecified";
 
+    public static final String ENUM_STRUCT_NAME_AS_PREFIX = "enumStructNameAsPrefix";
+
     public static final String FIELD_NAMES_IN_SNAKE_CASE = "fieldNamesInSnakeCase";
 
     public static final String USE_WRAPPER_TYPES = "useWrapperTypes";
@@ -77,6 +79,8 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
     private boolean startEnumsWithUnknown = false;
 
     private boolean startEnumsWithUnspecified = false;
+
+    private boolean enumStructNameAsPrefix = false;
 
     private boolean fieldNamesInSnakeCase = false;
 
@@ -193,6 +197,7 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
         addSwitch(NUMBERED_FIELD_NUMBER_LIST, "Field numbers in order.", numberedFieldNumberList);
         addSwitch(START_ENUMS_WITH_UNKNOWN, "Introduces \"UNKNOWN\" as the first element of enumerations.", startEnumsWithUnknown);
         addSwitch(START_ENUMS_WITH_UNSPECIFIED, "Introduces \"UNSPECIFIED\" as the first element of enumerations.", startEnumsWithUnspecified);
+        addSwitch(ENUM_STRUCT_NAME_AS_PREFIX, "Uses enum structure name as prefix for the enum values.", enumStructNameAsPrefix);
         addSwitch(FIELD_NAMES_IN_SNAKE_CASE, "Field names in snake_case.", fieldNamesInSnakeCase);
         addSwitch(USE_WRAPPER_TYPES, "Use primitive well-known wrappers types.", useWrapperTypes);
         addSwitch(CHECK_PROPERTIES_DUPLICATION, "Check duplication on properties.", checkPropertiesDuplication);
@@ -232,6 +237,10 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
 
         if (additionalProperties.containsKey(this.START_ENUMS_WITH_UNSPECIFIED)) {
             this.startEnumsWithUnspecified = convertPropertyToBooleanAndWriteBack(START_ENUMS_WITH_UNSPECIFIED);
+        }
+
+        if (additionalProperties.containsKey(this.ENUM_STRUCT_NAME_AS_PREFIX)) {
+            this.enumStructNameAsPrefix = convertPropertyToBooleanAndWriteBack(ENUM_STRUCT_NAME_AS_PREFIX);
         }
 
         if (additionalProperties.containsKey(this.FIELD_NAMES_IN_SNAKE_CASE)) {
@@ -765,6 +774,9 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
             if (cm.isEnum) {
                 Map<String, Object> allowableValues = cm.getAllowableValues();
                 addUnknownToAllowableValues(allowableValues);
+                if (this.enumStructNameAsPrefix) {
+                    addEnumValuesPrefix(allowableValues, cm.getClassname(), cm.dataType);
+                }
                 if (allowableValues.containsKey("enumVars")) {
                     List<Map<String, Object>> enumVars = (List<Map<String, Object>>)allowableValues.get("enumVars");
                     try {
@@ -775,7 +787,6 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
                         throw new RuntimeException("Exception when assigning an index to a protobuf enum field");
                     }
                 }
-                addEnumValuesPrefix(allowableValues, cm.getClassname(), cm.dataType);
             }
 
             // add types and names for each var
@@ -982,7 +993,10 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
                         throw new RuntimeException("Exception when assigning an index to a protobuf enum field");
                     }
                 }
-                addEnumValuesPrefix(var.allowableValues, var.getEnumName(), var.dataType);
+
+                if (this.enumStructNameAsPrefix) {
+                    addEnumValuesPrefix(var.allowableValues, var.getEnumName(), var.dataType);
+                }
             }
         }
     }

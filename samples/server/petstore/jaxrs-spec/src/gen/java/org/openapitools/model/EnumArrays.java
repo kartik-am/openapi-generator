@@ -1,3 +1,9 @@
+/*
+ * Generation info:
+ *   - generator version: 6.6.2-amadeus
+ *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
+ */
+
 package org.openapitools.model;
 
 import io.swagger.annotations.ApiModel;
@@ -15,12 +21,19 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 @JsonTypeName("EnumArrays")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen")
 public class EnumArrays  implements Serializable {
-  public enum JustSymbolEnum {
+  
+
+public enum JustSymbolEnum {
 
     GREATER_THAN_OR_EQUAL_TO(String.valueOf(">=")), DOLLAR(String.valueOf("$"));
 
@@ -67,8 +80,11 @@ public class EnumArrays  implements Serializable {
     }
 }
 
+  
   private @Valid JustSymbolEnum justSymbol;
-  public enum ArrayEnumEnum {
+
+
+public enum ArrayEnumEnum {
 
     FISH(String.valueOf("fish")), CRAB(String.valueOf("crab"));
 
@@ -115,7 +131,10 @@ public class EnumArrays  implements Serializable {
     }
 }
 
+  
   private @Valid List<ArrayEnumEnum> arrayEnum;
+
+  
 
   protected EnumArrays(EnumArraysBuilder<?, ?> b) {
     this.justSymbol = b.justSymbol;
@@ -132,6 +151,7 @@ public class EnumArrays  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("just_symbol")
@@ -151,6 +171,7 @@ public class EnumArrays  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("array_enum")
@@ -254,5 +275,19 @@ public class EnumArrays  implements Serializable {
       return self();
     }
   }
+
+  
+  private Map<String, Object> unknown = new HashMap<>();
+
+  @JsonAnyGetter
+  public Map<String, Object> getUnknown() {
+    return unknown;
+  }
+
+  @JsonAnySetter
+  public void addUnknown(String key, Object value) {
+    unknown.put(key, value);
+  }
+  
 }
 

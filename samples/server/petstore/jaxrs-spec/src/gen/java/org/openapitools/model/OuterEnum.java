@@ -1,3 +1,9 @@
+/*
+ * Generation info:
+ *   - generator version: 6.6.2-amadeus
+ *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
+ */
+
 package org.openapitools.model;
 
 import java.io.Serializable;
@@ -12,11 +18,11 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum OuterEnum {
   
-  PLACED("placed"),
+  PLACED("OUTER_ENUM_PLACED"),
   
-  APPROVED("approved"),
+  APPROVED("OUTER_ENUM_APPROVED"),
   
-  DELIVERED("delivered");
+  DELIVERED("OUTER_ENUM_DELIVERED");
 
   private String value;
 

@@ -1,3 +1,9 @@
+/*
+ * Generation info:
+ *   - generator version: 6.6.2-amadeus
+ *   - datetime: 2023-08-22T08:19:21.786034800Z[UTC]
+ */
+
 package org.openapitools.model;
 
 import io.swagger.annotations.ApiModel;
@@ -16,14 +22,27 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 @JsonTypeName("ArrayTest")
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaJAXRSSpecServerCodegen")
 public class ArrayTest  implements Serializable {
+  
+  
   private @Valid List<String> arrayOfString;
+
+  
   private @Valid List<List<Long>> arrayArrayOfInteger;
+
+  
   private @Valid List<List<ReadOnlyFirst>> arrayArrayOfModel;
+
+  
 
   protected ArrayTest(ArrayTestBuilder<?, ?> b) {
     this.arrayOfString = b.arrayOfString;
@@ -41,6 +60,7 @@ public class ArrayTest  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("array_of_string")
@@ -77,6 +97,7 @@ public class ArrayTest  implements Serializable {
   }
 
   
+  
   @ApiModelProperty(value = "")
   @JsonProperty("array_array_of_integer")
   public List<List<Long>> getArrayArrayOfInteger() {
@@ -111,6 +132,7 @@ public class ArrayTest  implements Serializable {
     return this;
   }
 
+  
   
   @ApiModelProperty(value = "")
   @JsonProperty("array_array_of_model")
@@ -221,5 +243,19 @@ public class ArrayTest  implements Serializable {
       return self();
     }
   }
+
+  
+  private Map<String, Object> unknown = new HashMap<>();
+
+  @JsonAnyGetter
+  public Map<String, Object> getUnknown() {
+    return unknown;
+  }
+
+  @JsonAnySetter
+  public void addUnknown(String key, Object value) {
+    unknown.put(key, value);
+  }
+  
 }
 
