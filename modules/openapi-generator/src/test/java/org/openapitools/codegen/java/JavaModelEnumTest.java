@@ -50,7 +50,7 @@ public class JavaModelEnumTest {
         final CodegenProperty enumVar = cm.vars.get(0);
         Assert.assertEquals(enumVar.baseName, "name");
         Assert.assertEquals(enumVar.dataType, "String");
-        Assert.assertEquals(enumVar.datatypeWithEnum, "NameEnum");
+        Assert.assertEquals(enumVar.datatypeWithEnum, "Name");
         Assert.assertEquals(enumVar.name, "name");
         Assert.assertNull(enumVar.defaultValue);
         Assert.assertEquals(enumVar.baseType, "String");
@@ -73,7 +73,7 @@ public class JavaModelEnumTest {
         final CodegenProperty enumVar = cm.vars.get(0);
         Assert.assertEquals(enumVar.baseName, "name");
         Assert.assertEquals(enumVar.dataType, "List<String>");
-        Assert.assertEquals(enumVar.datatypeWithEnum, "List<NameEnum>");
+        Assert.assertEquals(enumVar.datatypeWithEnum, "List<Name>");
         Assert.assertEquals(enumVar.name, "name");
         Assert.assertEquals(enumVar.defaultValue, null);
         Assert.assertEquals(enumVar.baseType, "List");
@@ -81,7 +81,7 @@ public class JavaModelEnumTest {
 
         Assert.assertEquals(enumVar.mostInnerItems.baseName, "name");
         Assert.assertEquals(enumVar.mostInnerItems.dataType, "String");
-        Assert.assertEquals(enumVar.mostInnerItems.datatypeWithEnum, "NameEnum");
+        Assert.assertEquals(enumVar.mostInnerItems.datatypeWithEnum, "Name");
         Assert.assertEquals(enumVar.mostInnerItems.name, "name");
         Assert.assertNull(enumVar.mostInnerItems.defaultValue);
         Assert.assertEquals(enumVar.mostInnerItems.baseType, "String");
@@ -106,7 +106,7 @@ public class JavaModelEnumTest {
         final CodegenProperty enumVar = cm.vars.get(0);
         Assert.assertEquals(enumVar.baseName, "name");
         Assert.assertEquals(enumVar.dataType, "List<List<String>>");
-        Assert.assertEquals(enumVar.datatypeWithEnum, "List<List<NameEnum>>");
+        Assert.assertEquals(enumVar.datatypeWithEnum, "List<List<Name>>");
         Assert.assertEquals(enumVar.name, "name");
         Assert.assertEquals(enumVar.defaultValue, null);
         Assert.assertEquals(enumVar.baseType, "List");
@@ -114,7 +114,7 @@ public class JavaModelEnumTest {
 
         Assert.assertEquals(enumVar.mostInnerItems.baseName, "name");
         Assert.assertEquals(enumVar.mostInnerItems.dataType, "String");
-        Assert.assertEquals(enumVar.mostInnerItems.datatypeWithEnum, "NameEnum");
+        Assert.assertEquals(enumVar.mostInnerItems.datatypeWithEnum, "Name");
         Assert.assertEquals(enumVar.mostInnerItems.name, "name");
         Assert.assertNull(enumVar.mostInnerItems.defaultValue);
         Assert.assertEquals(enumVar.mostInnerItems.baseType, "String");
