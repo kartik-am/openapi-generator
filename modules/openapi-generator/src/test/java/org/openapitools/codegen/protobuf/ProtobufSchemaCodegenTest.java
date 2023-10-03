@@ -225,6 +225,21 @@ public class ProtobufSchemaCodegenTest {
     }
 
     @Test
+    public void testCodeGenWithMergeAndConflictingIndexes() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> globalProperties = new HashMap<>();
+        // set line break to \n across all platforms
+        System.setProperty("line.separator", "\n");
+
+        File output = Files.createTempDirectory("test").toFile();
+
+        assertThatThrownBy(() ->
+                generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/merging-properties-conflicting-indexes.yaml"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Property 'links' has different indexes (1, hash) in schemas");
+    }
+
+    @Test
     public void testCodeGenDuplicateSchemaNoError() throws IOException {
         Map<String, Object> properties = new HashMap<>();
         Map<String, String> globalProperties = new HashMap<>();
