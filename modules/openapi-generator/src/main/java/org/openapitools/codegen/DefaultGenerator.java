@@ -371,17 +371,30 @@ public class DefaultGenerator implements Generator {
             Map<String, Schema> newProps = flatProperties(schemas, schema.get$ref(), schema.getProperties());
             if (newProps != null) {
                 for (Map.Entry<String, Schema> property : newProps.entrySet()) {
-                    if (!properties.containsKey(property.getKey())) {
-                        properties.put(property.getKey(), property.getValue());
+                    String propertyKey = property.getKey();
+                    Schema propertyValue = property.getValue();
+                    if (!properties.containsKey(propertyKey)) {
+                        properties.put(propertyKey, propertyValue);
                     } else {
-                        if (!properties.get(property.getKey()).getClass().equals(Schema.class) &&
-                                !property.getValue().getClass().equals(Schema.class) &&
-                                !properties.get(property.getKey()).getType().equals(property.getValue().getType())) {
-                            String msg = "Property \'" + property.getKey() + "\' has different types ("
-                                    + properties.get(property.getKey()).getType() + ", "
-                                    + property.getValue().getType() + ") in schemas";
-                            LOGGER.error(msg);
-                            throw new RuntimeException(msg);
+                        if (!properties.get(propertyKey).getClass().equals(Schema.class) &&
+                                !propertyValue.getClass().equals(Schema.class)) {
+                            if (!properties.get(propertyKey).getType().equals(propertyValue.getType())) {
+                                String msg = "Property \'" + propertyKey + "\' has different types ("
+                                        + properties.get(propertyKey).getType() + ", "
+                                        + propertyValue.getType() + ") in schemas";
+                                LOGGER.error(msg);
+                                throw new RuntimeException(msg);
+                            } else {
+                                Object propertiesIndex = (properties.get(propertyKey).getExtensions() != null ? properties.get(propertyKey).getExtensions().get("x-protobuf-index") : null);
+                                Object propertyIndex = (propertyValue.getExtensions() != null ? propertyValue.getExtensions().get("x-protobuf-index") : null);
+                                if (!hasSameIndex(propertiesIndex, propertyIndex)) {
+                                    String msg = "Property \'" + propertyKey + "\' has different indexes ("
+                                            + (propertiesIndex!=null ? propertiesIndex.toString() : "hash") + ", "
+                                            + (propertyIndex!=null ? propertyIndex.toString() : "hash") + ") in schemas";
+                                    LOGGER.error(msg);
+                                    throw new RuntimeException(msg);
+                                }
+                            }
                         }
                     }
                 }
@@ -389,6 +402,14 @@ public class DefaultGenerator implements Generator {
         }
 
         return properties;
+    }
+
+    private static boolean hasSameIndex(Object propertiesIndex, Object propertyIndex) {
+        if (propertiesIndex != null ^ propertyIndex != null) {
+            return false;
+        }
+
+        return propertiesIndex == propertyIndex;
     }
 
     private boolean isConflictingProperties(Set<String> duplicateSchemas, Map<String, Schema> schemas) {
