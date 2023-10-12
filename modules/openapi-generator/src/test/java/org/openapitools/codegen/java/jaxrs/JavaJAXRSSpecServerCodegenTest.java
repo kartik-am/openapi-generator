@@ -3,10 +3,8 @@ package org.openapitools.codegen.java.jaxrs;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.core.models.ParseOptions;
-import org.assertj.core.condition.AllOf;
 import org.mockito.MockedStatic;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.config.CodegenConfigurator;
@@ -622,7 +620,6 @@ public class JavaJAXRSSpecServerCodegenTest extends JavaJaxrsBaseTest {
     public void generateDeepObjectArrayWithPattern() throws IOException {
         File output = Files.createTempDirectory("test").toFile().getCanonicalFile();
         output.deleteOnExit();
-        String outputPath = output.getAbsolutePath().replace('\\', '/');
 
         OpenAPI openAPI = new OpenAPIParser()
                 .readLocation("src/test/resources/3_0/deepobject-array-with-pattern.yaml", null, new ParseOptions()).getOpenAPI();
@@ -946,6 +943,35 @@ public class JavaJAXRSSpecServerCodegenTest extends JavaJaxrsBaseTest {
     }
 
     @Test
+    public void generateModelWithEnumAndOriginalCase() throws Exception {
+        final File output = Files.createTempDirectory("test").toFile();
+        output.deleteOnExit();
+
+        final OpenAPI openAPI = new OpenAPIParser()
+                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/enum_original_case.yaml",
+                        null, new ParseOptions()).getOpenAPI();
+
+        codegen.setOutputDir(output.getAbsolutePath());
+        codegen.additionalProperties().put(KEEP_ENUM_NAME_ORIGINAL_CASE, true);
+
+        final ClientOptInput input = new ClientOptInput()
+                .openAPI(openAPI)
+                .config(codegen); //Using JavaJAXRSSpecServerCodegen
+
+        final DefaultGenerator generator = new DefaultGenerator();
+        final List<File> files = generator.opts(input).generate(); //When generating files
+
+        //Then the java files are compilable
+        validateJavaSourceFiles(files);
+
+        //And the generated class contains CompletionStage<Response>
+        TestUtils.ensureContainsFile(files, output, "src/gen/java/org/openapitools/model/EnumOriginalCase.java");
+        Path path = Paths.get(output + "/src/gen/java/org/openapitools/model/EnumOriginalCase.java");
+        // Expected JAVA file is suffixed by .test to avoid automatic JAVA refactor done by IDE
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/JavaJaxRSSpec/EnumOriginalCase.java.test"));
+    }
+
+    @Test
     public void generateModelWithEnumBaseWithPrefix() throws Exception {
         final File output = Files.createTempDirectory("test").toFile();
         output.deleteOnExit();
@@ -975,7 +1001,37 @@ public class JavaJAXRSSpecServerCodegenTest extends JavaJaxrsBaseTest {
     }
 
     @Test
-    public void generateModelWithEnumBaseInOnjectWithPrefix() throws Exception {
+    public void generateModelWithEnumWithPrefixAndOriginalCase() throws Exception {
+        final File output = Files.createTempDirectory("test").toFile();
+        output.deleteOnExit();
+
+        final OpenAPI openAPI = new OpenAPIParser()
+                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/enum_prefix_original_case.yaml",
+                        null, new ParseOptions()).getOpenAPI();
+
+        codegen.setOutputDir(output.getAbsolutePath());
+        codegen.additionalProperties().put(KEEP_ENUM_NAME_ORIGINAL_CASE, true);
+        codegen.additionalProperties().put(ENUM_STRUCT_NAME_AS_PREFIX, true);
+
+        final ClientOptInput input = new ClientOptInput()
+                .openAPI(openAPI)
+                .config(codegen); //Using JavaJAXRSSpecServerCodegen
+
+        final DefaultGenerator generator = new DefaultGenerator();
+        final List<File> files = generator.opts(input).generate(); //When generating files
+
+        //Then the java files are compilable
+        validateJavaSourceFiles(files);
+
+        //And the generated class contains CompletionStage<Response>
+        TestUtils.ensureContainsFile(files, output, "src/gen/java/org/openapitools/model/EnumPrefixOriginalCase.java");
+        Path path = Paths.get(output + "/src/gen/java/org/openapitools/model/EnumPrefixOriginalCase.java");
+        // Expected JAVA file is suffixed by .test to avoid automatic JAVA refactor done by IDE
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/JavaJaxRSSpec/EnumPrefixOriginalCase.java.test"));
+    }
+
+    @Test
+    public void generateModelWithEnumBaseInObjectWithPrefix() throws Exception {
         final File output = Files.createTempDirectory("test").toFile();
         output.deleteOnExit();
 
@@ -1088,5 +1144,35 @@ public class JavaJAXRSSpecServerCodegenTest extends JavaJaxrsBaseTest {
         Path path = Paths.get(output + "/src/gen/java/org/openapitools/model/OfferPayloadAllOfOfferDataOfferSet.java");
         // Expected JAVA file is suffixed by .test to avoid automatic JAVA refactor done by IDE
         TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/JavaJaxRSSpec/MergingProperties.java.test"));
+    }
+
+    @Test
+    public void generateModelWithEnumAndOriginalCaseWithUnknown() throws IOException {
+        final File output = Files.createTempDirectory("test").toFile();
+        output.deleteOnExit();
+
+        final OpenAPI openAPI = new OpenAPIParser()
+                .readLocation("src/test/resources/3_0/JavaJaxRSSpec/enum_original_case_with_unknown.yaml",
+                        null, new ParseOptions()).getOpenAPI();
+
+        codegen.setOutputDir(output.getAbsolutePath());
+        codegen.additionalProperties().put(KEEP_ENUM_NAME_ORIGINAL_CASE, true);
+        codegen.additionalProperties().put(START_ENUMS_WITH_UNKNOWN, true);
+
+        final ClientOptInput input = new ClientOptInput()
+                .openAPI(openAPI)
+                .config(codegen); //Using JavaJAXRSSpecServerCodegen
+
+        final DefaultGenerator generator = new DefaultGenerator();
+        final List<File> files = generator.opts(input).generate(); //When generating files
+
+        //Then the java files are compilable
+        validateJavaSourceFiles(files);
+
+        //And the generated class contains CompletionStage<Response>
+        TestUtils.ensureContainsFile(files, output, "src/gen/java/org/openapitools/model/EnumOriginalCaseWithUnknown.java");
+        Path path = Paths.get(output + "/src/gen/java/org/openapitools/model/EnumOriginalCaseWithUnknown.java");
+        // Expected JAVA file is suffixed by .test to avoid automatic JAVA refactor done by IDE
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/JavaJaxRSSpec/EnumOriginalCaseWithUnknown.java.test"));
     }
 }
