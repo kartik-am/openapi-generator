@@ -793,6 +793,33 @@ public class ProtobufSchemaCodegenTest {
         FileUtils.deleteDirectory(output);
     }
 
+    @Test
+    public void testEnumWithPrefixAndOriginalCase() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("enumStructNameAsPrefix", true);
+        properties.put("keepEnumNameOriginalCase", true);
+        Map<String, String> globalProperties = new HashMap<>();
+        File output = Files.createTempDirectory("test").toFile();
+        List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/enum-with-prefix-original-case.yaml");
+        TestUtils.ensureContainsFile(files, output, "models/status.proto");
+        Path path = Paths.get(output + "/models/status.proto");
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/enum-with-prefix-original-case.proto"));
+        FileUtils.deleteDirectory(output);
+    }
+
+    @Test
+    public void testEnumWithOriginalCase() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("keepEnumNameOriginalCase", true);
+        Map<String, String> globalProperties = new HashMap<>();
+        File output = Files.createTempDirectory("test").toFile();
+        List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/enum-original-case.yaml");
+        TestUtils.ensureContainsFile(files, output, "models/status.proto");
+        Path path = Paths.get(output + "/models/status.proto");
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/enum-original-case.proto"));
+        FileUtils.deleteDirectory(output);
+    }
+
     private List<File> generate(File output, Map<String, Object> properties, Map<String, String> globalProperties, String inputFile) {
         final CodegenConfigurator configurator = new CodegenConfigurator()
                 .setGeneratorName("protobuf-schema")

@@ -68,6 +68,8 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
 
     public static final String CHECK_PROPERTIES_DUPLICATION = "checkPropertiesDuplication";
 
+    public static final String KEEP_ENUM_NAME_ORIGINAL_CASE = "keepEnumNameOriginalCase";
+
     private final Logger LOGGER = LoggerFactory.getLogger(ProtobufSchemaCodegen.class);
 
     protected String packageName = "openapitools";
@@ -87,6 +89,8 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
     private boolean useWrapperTypes = false;
 
     private boolean checkPropertiesDuplication = false;
+
+    private boolean keepEnumNameOriginalCase = false;
 
     private Map<String, String> protoWrapperTypesMapping = new HashMap<>();
 
@@ -201,6 +205,7 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
         addSwitch(FIELD_NAMES_IN_SNAKE_CASE, "Field names in snake_case.", fieldNamesInSnakeCase);
         addSwitch(USE_WRAPPER_TYPES, "Use primitive well-known wrappers types.", useWrapperTypes);
         addSwitch(CHECK_PROPERTIES_DUPLICATION, "Check duplication on properties.", checkPropertiesDuplication);
+        addSwitch(KEEP_ENUM_NAME_ORIGINAL_CASE, "Keep the original case of enum name.", keepEnumNameOriginalCase);
     }
 
     @Override
@@ -253,6 +258,11 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
         if (additionalProperties.containsKey(ProtobufSchemaCodegen.CHECK_PROPERTIES_DUPLICATION)) {
             this.checkPropertiesDuplication = convertPropertyToBooleanAndWriteBack(CHECK_PROPERTIES_DUPLICATION);
         }
+
+        if (additionalProperties.containsKey(ProtobufSchemaCodegen.KEEP_ENUM_NAME_ORIGINAL_CASE)) {
+            this.keepEnumNameOriginalCase = convertPropertyToBooleanAndWriteBack(KEEP_ENUM_NAME_ORIGINAL_CASE);
+        }
+
         configureTypeMapping();
 
         supportingFiles.add(new SupportingFile("README.mustache", "", "README.md"));
@@ -391,7 +401,11 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
             for(int i = 0 ; i < values.size() ; i++) {
                 if (!values.get(i).startsWith(prefix + "_")) {
                     // replace value by value with prefix
-                    values.set(i, underscore(prefix + "_" + values.get(i)).toUpperCase(Locale.ROOT));
+                    String value = prefix + "_" + values.get(i);
+                    if (!this.keepEnumNameOriginalCase) {
+                        value = underscore(value).toUpperCase(Locale.ROOT);
+                    }
+                    values.set(i, value);
                 }
             }
         }
@@ -434,7 +448,9 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
         if ("number".equalsIgnoreCase(datatype) || "boolean".equalsIgnoreCase(datatype)) {
             return value;
         } else {
-            value = underscore(value).toUpperCase(Locale.ROOT);
+            if (!this.keepEnumNameOriginalCase) {
+                value = underscore(value).toUpperCase(Locale.ROOT);
+            }
             return "\"" + escapeText(value) + "\"";
         }
     }
@@ -447,9 +463,12 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
             return "EMPTY";
         }
 
-        String var = underscore(value);
+        String var = value;
 
-        var = var.replaceAll("\\W+", "_").toUpperCase(Locale.ROOT);
+        var = var.replaceAll("\\W+", "_");
+        if (!this.keepEnumNameOriginalCase) {
+            var = underscore(var).toUpperCase(Locale.ROOT);
+        }
         if (var.matches("\\d.*")) {
             return "_" + var;
         } else {

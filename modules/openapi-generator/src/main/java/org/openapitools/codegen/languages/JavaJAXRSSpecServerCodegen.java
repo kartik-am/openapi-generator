@@ -52,6 +52,7 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
     public static final String START_ENUMS_WITH_UNKNOWN = "startEnumsWithUnknown";
     public static final String START_ENUMS_WITH_UNSPECIFIED = "startEnumsWithUnspecified";
     public static final String ENUM_STRUCT_NAME_AS_PREFIX = "enumStructNameAsPrefix";
+    public static final String KEEP_ENUM_NAME_ORIGINAL_CASE = "keepEnumNameOriginalCase";
 
     private boolean interfaceOnly = false;
     private boolean returnResponse = false;
@@ -69,6 +70,8 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
     private boolean startEnumsWithUnspecified = false;
 
     private boolean enumStructNameAsPrefix = false;
+
+    private boolean keepEnumNameOriginalCase = false;
 
     public JavaJAXRSSpecServerCodegen() {
         super();
@@ -131,6 +134,7 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
         cliOptions.add(CliOption.newBoolean(START_ENUMS_WITH_UNKNOWN, "Introduces \"UNKNOWN\" as the first element of enumerations.", startEnumsWithUnknown));
         cliOptions.add(CliOption.newBoolean(START_ENUMS_WITH_UNSPECIFIED, "Introduces \"UNSPECIFIED\" as the first element of enumerations.", startEnumsWithUnspecified));
         cliOptions.add(CliOption.newBoolean(ENUM_STRUCT_NAME_AS_PREFIX, "Uses enum structure name as prefix for the enum values.", startEnumsWithUnspecified));
+        cliOptions.add(CliOption.newBoolean(KEEP_ENUM_NAME_ORIGINAL_CASE, "Keep the original case of enum name.", keepEnumNameOriginalCase));
     }
 
     @Override
@@ -289,6 +293,10 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
         if (additionalProperties.containsKey(this.ENUM_STRUCT_NAME_AS_PREFIX)) {
             this.enumStructNameAsPrefix = convertPropertyToBooleanAndWriteBack(ENUM_STRUCT_NAME_AS_PREFIX);
         }
+
+        if (additionalProperties.containsKey(this.KEEP_ENUM_NAME_ORIGINAL_CASE)) {
+            this.keepEnumNameOriginalCase = convertPropertyToBooleanAndWriteBack(KEEP_ENUM_NAME_ORIGINAL_CASE);
+        }
     }
 
     @Override
@@ -356,11 +364,14 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
             List<String> values = (List<String>)allowableValues.get("values");
             for(int i = 0 ; i < values.size() ; i++) {
                 if (!values.get(i).startsWith(prefix + "_")) {
+                    String value = values.get(i);
                     if (this.enumStructNameAsPrefix) {
-                        // replace value by value with prefix
-                        values.set(i, underscore(prefix + "_" + values.get(i)));
+                        value = prefix + "_" + value;
                     }
-                    values.set(i, values.get(i).toUpperCase(Locale.ROOT));
+                    if (!keepEnumNameOriginalCase) {
+                        value = underscore(value).toUpperCase(Locale.ROOT);
+                    }
+                    values.set(i, value);
                 }
             }
         }
