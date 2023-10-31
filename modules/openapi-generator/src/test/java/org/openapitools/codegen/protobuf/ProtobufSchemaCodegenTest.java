@@ -225,6 +225,21 @@ public class ProtobufSchemaCodegenTest {
     }
 
     @Test
+    public void testCodeGenWithMergeAndConflictingIndexes() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        Map<String, String> globalProperties = new HashMap<>();
+        // set line break to \n across all platforms
+        System.setProperty("line.separator", "\n");
+
+        File output = Files.createTempDirectory("test").toFile();
+
+        assertThatThrownBy(() ->
+                generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/merging-properties-conflicting-indexes.yaml"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Property 'links' has different indexes (1, hash) in schemas");
+    }
+
+    @Test
     public void testCodeGenDuplicateSchemaNoError() throws IOException {
         Map<String, Object> properties = new HashMap<>();
         Map<String, String> globalProperties = new HashMap<>();
@@ -775,6 +790,33 @@ public class ProtobufSchemaCodegenTest {
         TestUtils.ensureContainsFile(files, output, "services/default_service.proto");
         Path path = Paths.get(output + "/services/default_service.proto");
         TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/operation-any-type.proto"));
+        FileUtils.deleteDirectory(output);
+    }
+
+    @Test
+    public void testEnumWithPrefixAndOriginalCase() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("enumStructNameAsPrefix", true);
+        properties.put("keepEnumNameOriginalCase", true);
+        Map<String, String> globalProperties = new HashMap<>();
+        File output = Files.createTempDirectory("test").toFile();
+        List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/enum-with-prefix-original-case.yaml");
+        TestUtils.ensureContainsFile(files, output, "models/status.proto");
+        Path path = Paths.get(output + "/models/status.proto");
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/enum-with-prefix-original-case.proto"));
+        FileUtils.deleteDirectory(output);
+    }
+
+    @Test
+    public void testEnumWithOriginalCase() throws IOException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("keepEnumNameOriginalCase", true);
+        Map<String, String> globalProperties = new HashMap<>();
+        File output = Files.createTempDirectory("test").toFile();
+        List<File> files = generate(output, properties, globalProperties, "src/test/resources/3_0/protobuf-schema/enum-original-case.yaml");
+        TestUtils.ensureContainsFile(files, output, "models/status.proto");
+        Path path = Paths.get(output + "/models/status.proto");
+        TestUtils.assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/enum-original-case.proto"));
         FileUtils.deleteDirectory(output);
     }
 
