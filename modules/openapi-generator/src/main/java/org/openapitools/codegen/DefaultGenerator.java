@@ -339,18 +339,7 @@ public class DefaultGenerator implements Generator {
                 $ref = ((Schema) allOfSchema).get$ref();
                 properties = flatProperties(schemas, $ref, properties);
             }
-        }/* else if (refSchema.get$ref() != null) {
-            $ref = refSchema.get$ref();
-            properties = flatProperties(schemas, $ref, properties);
-        } else {
-            Map<String, Schema> props = refSchema.getProperties();
-            if (props != null) {
-                for (Map.Entry<String, Schema> property : props.entrySet()) {
-                    $ref = property.getValue().get$ref();
-                    properties = flatProperties(schemas, $ref, properties);
-                }
-            }
-        }*/
+        }
     }
 
     private Map<String, Schema> flatProperties(Map<String, Schema> schemas, String $ref, Map<String, Schema> properties) {
@@ -366,9 +355,6 @@ public class DefaultGenerator implements Generator {
                 schema = schemas.get($ref.substring($ref.lastIndexOf("/") + 1, $ref.indexOf(".")));
             }
 
-            if (schema == null) {
-                LOGGER.info("schema null");
-            }
             Map<String, Schema> newProps = flatProperties(schemas, schema.get$ref(), schema.getProperties());
             if (newProps != null) {
                 for (Map.Entry<String, Schema> property : newProps.entrySet()) {
