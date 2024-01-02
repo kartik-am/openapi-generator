@@ -813,7 +813,10 @@ public class DefaultGenerator implements Generator {
 
         // post process all processed models
         allProcessedModels = config.postProcessAllModels(allProcessedModels);
-
+        
+        //Added on 27-12-23
+        int i = 0;
+        
         // generate files based on processed models
         for (String modelName : allProcessedModels.keySet()) {
             ModelsMap models = allProcessedModels.get(modelName);
@@ -836,6 +839,22 @@ public class DefaultGenerator implements Generator {
                             continue;  // Don't create user-defined classes for aliases
                         }
                     }
+//                    Add files 27-12-2023
+//                   String data = Json.pretty(modelTemplate);
+//                   LOGGER.info("############ String info ############: {}", data);
+                    
+                   /* String fileName = "C:/Users/sharmak/OneDrive - Amadeus Workplace/Documents/Open API/OpenAPI CLI/models/model_"+i;
+                    CodegenModel codegenModel = modelTemplate.getModel();
+                    String jsonModelString = codegenModel.getModelJson();
+                    File file = new File(fileName);
+                    try (FileOutputStream fos = new FileOutputStream(file);
+                            ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+                           oos.writeObject(jsonModelString);
+                           oos.flush();
+                       }
+                    i++;
+                    */
+                    //till here
                     allModels.add(modelTemplate);
                 }
 

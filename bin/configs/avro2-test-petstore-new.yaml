@@ -1,0 +1,6 @@
+generatorName: avro2-test
+outputDir: samples/schema/petstore/avro2/test
+inputSpec: modules/openapi-generator/src/test/resources/3_0/petstore.yaml
+templateDir: modules/openapi-generator/src/main/resources/avro2-test
+additionalProperties:
+  hideGenerationTimestamp: "true"

@@ -1,0 +1,9 @@
+  "properties": {
+  {{#vars}}
+    {
+      "name": "{{baseName}}",
+      "doc": "{{{description}}}"{{^required}},
+      "default": null{{/required}}
+    }{{^-last}},{{/-last}}
+  {{/vars}}
+  }

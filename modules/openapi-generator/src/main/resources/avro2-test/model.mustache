@@ -1,0 +1,8 @@
+{{#models}}
+{{#model}}
+{
+  "title": "{{{classname}}}",
+  {{#isEnum}}{{>modelEnum}}{{/isEnum}}{{^isEnum}}{{>pojo}}{{/isEnum}}
+}
+{{/model}}
+{{/models}}
