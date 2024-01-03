@@ -145,4 +145,17 @@ public interface GenApiDelegate {
 
     }
 
+	default ResponseEntity<ResponseCode> generateSchema(String language, GeneratorInput generatorInput){
+		
+		getRequest().ifPresent(request -> {
+            for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
+                if (mediaType.isCompatibleWith(MediaType.valueOf("*/*"))) {
+                    ApiUtil.setExampleResponse(request, "*/*", "{  \"code\" : \"d40029be-eda6-4d62-b1ef-d05e2e91a72a\",  \"link\" : \"http://localhost:80/api/gen/download/d40029be-eda6-4d62-b1ef-d05e2e91a72a\"}");
+                    break;
+                }
+            }
+        });
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+	}
+
 }

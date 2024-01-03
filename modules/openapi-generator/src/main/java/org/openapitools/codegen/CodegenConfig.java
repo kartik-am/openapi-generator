@@ -355,4 +355,6 @@ public interface CodegenConfig {
 
     boolean getUseOpenAPINormalizer();
 
+	String modelSchemaFileName(String modelName);
+
 }

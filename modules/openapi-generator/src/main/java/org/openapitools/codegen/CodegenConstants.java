@@ -28,6 +28,7 @@ public class CodegenConstants {
     public static final String SUPPORTING_FILES = "supportingFiles";
     public static final String MODEL_TESTS = "modelTests";
     public static final String MODEL_DOCS = "modelDocs";
+    public static final String MODEL_SCHEMAS = "modelSchemas";
     public static final String API_TESTS = "apiTests";
     public static final String API_DOCS = "apiDocs";
     public static final String CUSTOM_OPTIONS = "customOptions";

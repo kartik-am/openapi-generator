@@ -113,6 +113,12 @@ public class GenApiService implements GenApiDelegate {
         String filename = Generator.generateClient(language, generatorInput);
         return getResponse(filename, language + "-client");
     }
+    
+    @Override
+    public ResponseEntity<ResponseCode> generateSchema(String language, GeneratorInput generatorInput) {
+        String filename = Generator.generateSchema(language, generatorInput);
+        return getResponse(filename, language);
+    }
 
     @Override
     public ResponseEntity<Map<String, CliOption>> getClientOptions(String language) {

@@ -13,7 +13,8 @@ public enum TemplateFileType {
     ModelDocs(Constants.MODEL_DOCS),
     APITests(Constants.API_TESTS),
     ModelTests(Constants.MODEL_TESTS),
-    SupportingFiles(Constants.SUPPORTING_FILES);
+    SupportingFiles(Constants.SUPPORTING_FILES),
+	ModelSchemas(Constants.MODEL_SCHEMAS);
 
     private final String templateType;
 
@@ -57,5 +58,6 @@ public enum TemplateFileType {
         public static final String MODEL_DOCS = "modelDocs";
         public static final String API_TESTS = "apiTests";
         public static final String API_DOCS = "apiDocs";
+        public static final String MODEL_SCHEMAS = "modelSchemas";
     }
 }

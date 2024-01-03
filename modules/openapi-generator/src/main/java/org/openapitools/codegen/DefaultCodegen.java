@@ -5959,6 +5959,12 @@ public class DefaultCodegen implements CodegenConfig {
         String suffix = modelTemplateFiles().get(templateName);
         return modelFileFolder() + File.separator + toModelFilename(modelName) + suffix;
     }
+    
+    @Override
+    public String modelSchemaFileName(String modelName) {
+        String suffix = ".json";
+        return modelFileFolder() + File.separator + toModelFilename(modelName) + suffix;
+    }
 
     /**
      * Return the full path and API documentation file

@@ -1,0 +1,10 @@
+{{#models}}
+{{#model}}
+{
+    "name": "{{{classname}}}",
+    "type": "{{#isEnum}}enum{{/isEnum}}{{^isEnum}}object{{/isEnum}}",
+    "description" : "{{{description}}}",
+    {{>properties}}
+}
+{{/model}}
+{{/models}}

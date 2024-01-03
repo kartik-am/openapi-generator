@@ -686,6 +686,29 @@ public class DefaultGenerator implements Generator {
             }
         }
     }
+    
+    private void generateModelSchema(List<File> files, String modelSchema, String modelName) throws IOException {
+            String filename = config.modelSchemaFileName(modelName);
+            String adjustedOutputFilename = filename.replaceAll("//", "/").replace('/', File.separatorChar);
+            File target = new File(adjustedOutputFilename);
+            File written = null;
+            if (ignoreProcessor.allowsFile(target)) {
+                if (true) {
+                    Path outDir = java.nio.file.Paths.get(CodegenConstants.MODEL_SCHEMAS).toAbsolutePath();
+                    Path absoluteTarget = target.toPath().toAbsolutePath();
+                    if (!absoluteTarget.startsWith(outDir)) {
+                        throw new RuntimeException(String.format(Locale.ROOT, "Target files must be generated within the output directory; absoluteTarget=%s outDir=%s", absoluteTarget, outDir));
+                    }
+                     written =  this.templateProcessor.writeToFile(adjustedOutputFilename, modelSchema.getBytes("utf-8"));
+                }
+            if (written != null) {
+                files.add(written);
+                if (config.isEnablePostProcessFile() && !dryRun) {
+                    config.postProcessFile(written, "model-schema");
+                }
+            }
+                }
+    }
 
     void generateModels(List<File> files, List<ModelMap> allModels, List<String> unusedModels) {
         if (!generateModels) {
@@ -839,6 +862,9 @@ public class DefaultGenerator implements Generator {
                     allModels.add(modelTemplate);
                 }
 
+                //generate modelJsonSchema files -> kajal 
+//                generateModelSchema(files,  modelList.get(0).getModel().getModelJson(), modelName);
+                
                 // to generate model files
                 generateModel(files, models, modelName);
 
@@ -849,7 +875,9 @@ public class DefaultGenerator implements Generator {
                 generateModelDocumentation(files, models, modelName);
 
             } catch (Exception e) {
+            	System.out.println(e.toString());
                 throw new RuntimeException("Could not generate model '" + modelName + "'", e);
+                
             }
         }
         if (GlobalSettings.getProperty("debugModels") != null) {
@@ -859,7 +887,12 @@ public class DefaultGenerator implements Generator {
 
     }
 
-    // package name matches model package
+    private void generateModelSchema(List<File> files, ModelsMap models, String modelName) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	// package name matches model package
     // e.g. my_package/foo => my_package.foo
     private String toPackageName(String modelPackage) {
         return modelPackage.replace("/", ".");

@@ -60,7 +60,7 @@ public class Generator {
     }
 
     public enum Type {
-        CLIENT("client"), SERVER("server");
+        CLIENT("client"), SERVER("server"), SCHEMA("schema");
 
         private String name;
 
@@ -79,6 +79,10 @@ public class Generator {
 
     public static String generateServer(String language, GeneratorInput opts) {
         return generate(language, opts, Type.SERVER);
+    }
+    
+    public static String generateSchema(String language, GeneratorInput opts) {
+        return generate(language, opts, Type.SCHEMA);
     }
 
     private static String generate(String language, GeneratorInput opts, Type type) {
@@ -174,7 +178,9 @@ public class Generator {
                 LOGGER.error("unable to delete output folder " + outputFolder, e);
             }
         } catch (Exception e) {
+        	System.out.println(e.getMessage().toString());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to build target: " + e.getMessage(), e);
+            
         }
         return outputFilename;
     }

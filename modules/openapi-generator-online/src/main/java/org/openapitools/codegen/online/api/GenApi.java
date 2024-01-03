@@ -113,5 +113,14 @@ public interface GenApi {
     default ResponseEntity<List<String>> serverOptions() {
         return getDelegate().serverOptions();
     }
+    
+    @ApiOperation(value = "Generates a schema", nickname = "generateSchema", notes = "Accepts a `GeneratorInput` options map for spec location and generation options", response = ResponseCode.class, tags={ "schema", })
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "successful operation", response = ResponseCode.class) })
+    @RequestMapping(value = "/gen/schema/{language}",
+            method = RequestMethod.POST)
+    default ResponseEntity<ResponseCode> generateSchema(@ApiParam(value = "The target language for the client library",required=true) @PathVariable("language") String language,@ApiParam(value = "Configuration for building the client library" ,required=true )  @Valid @RequestBody GeneratorInput generatorInput) {
+        return getDelegate().generateSchema(language, generatorInput);
+    }
 
 }

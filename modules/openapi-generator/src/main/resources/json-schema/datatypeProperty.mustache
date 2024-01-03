@@ -1,0 +1,1 @@
+{{^isEnum}}{{^isContainer}}{{#isPrimitiveType}}"type" : "{{dataType}}"{{/isPrimitiveType}}{{^isPrimitiveType}}"$ref" : "{{package}}/{{dataType}}"{{/isPrimitiveType}}{{/isContainer}}{{#isContainer}}{{>datatypeArray}}{{/isContainer}}{{/isEnum}}{{#isEnum}}"type" : "enum"{{/isEnum}}
