@@ -300,8 +300,6 @@ public class DefaultGenerator implements Generator {
     private void checkSchemas(Map<String, Schema> schemas) throws RuntimeException {
         Map<String, Schema> unusedSchemas = new HashMap<>();
 
-        //flattenAllOfSchemaRef(schemas);
-
         for (Map.Entry<String, Schema> schema : schemas.entrySet()) {
             Set<String> duplicateSchemas = findDuplicates(schema, schemas);
             if (duplicateSchemas != null && !duplicateSchemas.isEmpty()) {
@@ -340,17 +338,6 @@ public class DefaultGenerator implements Generator {
             for (Object allOfSchema : refSchema.getAllOf()) {
                 $ref = ((Schema) allOfSchema).get$ref();
                 properties = flatProperties(schemas, $ref, properties);
-            }
-        } else if (refSchema.get$ref() != null) {
-            $ref = refSchema.get$ref();
-            properties = flatProperties(schemas, $ref, properties);
-        } else {
-            Map<String, Schema> props = refSchema.getProperties();
-            if (props != null) {
-                for (Map.Entry<String, Schema> property : props.entrySet()) {
-                    $ref = property.getValue().get$ref();
-                    properties = flatProperties(schemas, $ref, properties);
-                }
             }
         }
     }
