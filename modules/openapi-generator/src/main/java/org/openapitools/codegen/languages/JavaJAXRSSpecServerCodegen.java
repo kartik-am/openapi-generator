@@ -22,12 +22,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.meta.features.DocumentationFeature;
 import org.openapitools.codegen.model.ModelMap;
+<<<<<<< HEAD
 import org.openapitools.codegen.model.ModelsMap;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+=======
+import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.meta.features.SecurityFeature;
+
+import java.io.File;
+import java.util.List;
+>>>>>>> 635f7952cec10eecf437886ccd03983b655cd6f2
 import java.util.Map;
 
 import static org.openapitools.codegen.languages.features.GzipFeatures.USE_GZIP_FEATURE;
@@ -76,7 +84,13 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
     public JavaJAXRSSpecServerCodegen() {
         super();
 
-        modifyFeatureSet(features -> features.includeDocumentationFeatures(DocumentationFeature.Readme));
+        modifyFeatureSet(features -> features
+                .includeDocumentationFeatures(DocumentationFeature.Readme)
+                .includeSecurityFeatures(SecurityFeature.OpenIDConnect,//quarkus only
+                        SecurityFeature.OAuth2_ClientCredentials,
+                        SecurityFeature.OAuth2_AuthorizationCode,
+                        SecurityFeature.OAuth2_Password)
+        );
 
         invokerPackage = "org.openapitools.api";
         artifactId = "openapi-jaxrs-server";
@@ -392,6 +406,7 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
         }
     }
 
+<<<<<<< HEAD
     /**
      * Adds unknown value to the enum allowable values
      *
@@ -442,4 +457,13 @@ public class JavaJAXRSSpecServerCodegen extends AbstractJavaJAXRSServerCodegen {
 
         return super.postProcessModels(objs);
     }
+=======
+    @Override
+    public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        objs = super.postProcessOperationsWithModels(objs, allModels);
+        removeImport(objs, "java.util.List");
+        return objs;
+    }
+
+>>>>>>> 635f7952cec10eecf437886ccd03983b655cd6f2
 }
