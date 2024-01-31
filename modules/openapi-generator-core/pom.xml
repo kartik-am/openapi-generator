@@ -6,7 +6,11 @@
     <artifactId>openapi-generator-project</artifactId>
     <groupId>org.openapitools</groupId>
     <!-- RELEASE_VERSION -->
+<<<<<<< HEAD
     <version>6.6.3-amadeus</version>
+=======
+    <version>7.0.0-beta</version>
+>>>>>>> 635f7952cec10eecf437886ccd03983b655cd6f2
     <!-- /RELEASE_VERSION -->
     <relativePath>../..</relativePath>
   </parent>

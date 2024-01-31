@@ -4,7 +4,11 @@
         <groupId>org.openapitools</groupId>
         <artifactId>openapi-generator-project</artifactId>
         <!-- RELEASE_VERSION -->
+<<<<<<< HEAD
         <version>6.6.3-amadeus</version>
+=======
+        <version>7.0.0-beta</version>
+>>>>>>> 635f7952cec10eecf437886ccd03983b655cd6f2
         <!-- /RELEASE_VERSION -->
         <relativePath>../..</relativePath>
     </parent>
@@ -217,10 +221,6 @@
                 <version>${maven-javadoc-plugin.version}</version>
                 <configuration>
                     <debug>true</debug>
-                    <links>
-                        <link>http://java.sun.com/javaee/5/docs/api</link>
-                        <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
-                    </links>
                     <excludePackageNames/>
                 </configuration>
             </plugin>
@@ -438,6 +438,12 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>3.23.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

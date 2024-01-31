@@ -830,7 +830,27 @@ public class ProtobufSchemaCodegenTest {
 
         final ClientOptInput clientOptInput = configurator.toClientOptInput();
         DefaultGenerator generator = new DefaultGenerator();
+<<<<<<< HEAD
         
         return generator.opts(clientOptInput).generate();
+=======
+        List<File> files = generator.opts(clientOptInput).generate();
+
+        TestUtils.ensureContainsFile(files, output, "models/pet.proto");
+        Path path = Paths.get(output + "/models/pet.proto");
+
+        assertFileEquals(path, Paths.get("src/test/resources/3_0/protobuf-schema/pet.proto"));
+
+        output.deleteOnExit();
+    }
+
+    private void assertFileEquals(Path generatedFilePath, Path expectedFilePath) throws IOException {
+        String generatedFile = new String(Files.readAllBytes(generatedFilePath), StandardCharsets.UTF_8)
+            .replace("\n", "").replace("\r", "");
+        String expectedFile = new String(Files.readAllBytes(expectedFilePath), StandardCharsets.UTF_8)
+            .replace("\n", "").replace("\r", "");
+
+        assertEquals(generatedFile, expectedFile);
+>>>>>>> 635f7952cec10eecf437886ccd03983b655cd6f2
     }
 }
