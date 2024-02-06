@@ -946,6 +946,9 @@ public class ProtobufSchemaCodegen extends DefaultCodegen implements CodegenConf
             if (cm.getImports().contains("google.type.TimeOfDay")) {
                 supportingFiles.add(new SupportingFile("dependencies/google/type/timeofday.proto", "google/type/timeofday.proto"));
             }
+            if (cm.getImports().contains("google.type.DateTime")) {
+                supportingFiles.add(new SupportingFile("dependencies/google/type/datetime.proto", "google/type/datetime.proto"));
+            }
         }
         return objs;
     }
